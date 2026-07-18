@@ -80,6 +80,31 @@
   background: var(--color-orange);
 }
 
+.backupAlert {
+  display: grid;
+  padding: 10px 18px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  border-bottom: var(--border-heavy);
+  background: var(--color-pink);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.backupAlert button {
+  min-height: 38px;
+  padding: 6px 12px;
+  border: var(--border);
+  background: var(--color-green);
+  box-shadow: var(--shadow-small);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
 .workspace {
   display: grid;
   min-height: calc(100vh - 82px);
@@ -384,6 +409,14 @@
   .workspace {
     display: block;
     min-height: auto;
+  }
+
+  .backupAlert {
+    grid-template-columns: 1fr auto;
+  }
+
+  .backupAlert strong {
+    grid-column: 1 / -1;
   }
 
   .sidebar {

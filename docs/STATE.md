@@ -14,12 +14,14 @@ tarefa concluída.
 - Etapa 1 aprovada: Preact + TypeScript + Vite, PWA, shell neo-brutalista,
   contratos e schema IndexedDB v1.
 - Etapa 2 aprovada: catálogo, carrinho e venda paga por PIX, dinheiro ou cartão.
+- Etapa 3 aprovada: clientes, venda fiada, pagamentos parciais, cobrança por
+  WhatsApp, módulos separados de cadastro e schema v2 com produtos, serviços e
+  estoque opcional.
 
 ## [EM PROGRESSO]
 
-- Etapa 3: clientes, venda fiada, pagamentos parciais e cobrança por WhatsApp.
+- Etapa 4: BI client-side, backup, importação e alertas de segurança dos dados.
 
 ## [PRÓXIMO]
 
-- Adicionar BI, backup e alertas de segurança dos dados.
 - Integrar anúncios, pagamento e licença sem anúncios.

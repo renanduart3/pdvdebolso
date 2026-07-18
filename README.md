@@ -33,6 +33,10 @@ publicado no Cloudflare Pages em `pdvdebolso.com`.
 - **Produtos e Serviços:** cadastro, ativação, desativação e estoque opcional.
 - **Clientes:** cadastro, WhatsApp e anotações.
 - **Configurações:** chave PIX e proteção do armazenamento local.
+- **Inteligência:** caixa, métodos de pagamento, horários de pico, mapa
+  semanal, produtos campeões, burn rate e saúde do fiado.
+- **Backup:** exportação JSON, importação validada, restauração atômica e
+  lembrete a cada 14 dias.
 
 Produtos com estoque controlado têm a quantidade baixada atomicamente junto da
 venda. Serviços não possuem estoque. Itens antigos são migrados como produtos
@@ -63,8 +67,8 @@ O diretório de publicação no Cloudflare Pages é `dist`.
 - [Estado do projeto](docs/STATE.md)
 
 Apagar os dados do site, trocar de dispositivo ou mudar a origem da aplicação
-pode eliminar o banco local. Exportação, importação e lembrete quinzenal de
-backup fazem parte da próxima etapa.
+pode eliminar o banco local. Use o backup em Configurações pelo menos a cada
+14 dias.
 
 Os arquivos JavaScript antigos na raiz são um scaffold legado e ainda não estão
 conectados ao aplicativo Preact em `src/`.

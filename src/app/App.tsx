@@ -1,5 +1,7 @@
 import { useEffect, useState } from "preact/hooks";
 
+import { backupRepository } from "../database/repositories";
+import { BiPage } from "../features/bi/BiPage";
 import { CatalogoPage } from "../features/catalogo/CatalogoPage";
 import { ClientesPage } from "../features/clientes/ClientesPage";
 import { ConfiguracoesPage } from "../features/configuracoes/ConfiguracoesPage";
@@ -7,7 +9,13 @@ import { FiadoPage } from "../features/fiado/FiadoPage";
 import { PdvPage } from "../features/pdv/PdvPage";
 import styles from "./App.module.css";
 
-type View = "pdv" | "fiado" | "catalogo" | "clientes" | "configuracoes";
+type View =
+  | "pdv"
+  | "fiado"
+  | "catalogo"
+  | "clientes"
+  | "bi"
+  | "configuracoes";
 
 type NavigationItem = {
   view: View | null;
@@ -35,7 +43,7 @@ const navigationItems: NavigationItem[] = [
     icon: "04"
   },
   {
-    view: null,
+    view: "bi",
     label: "Inteligência",
     shortLabel: "BI",
     color: "green",
@@ -71,6 +79,22 @@ function useOnlineStatus() {
 export function App() {
   const online = useOnlineStatus();
   const [view, setView] = useState<View>("pdv");
+  const [backupPendente, setBackupPendente] = useState(false);
+
+  useEffect(() => {
+    let ativo = true;
+    backupRepository
+      .precisaBackup()
+      .then((pendente) => {
+        if (ativo) setBackupPendente(pendente);
+      })
+      .catch(() => {
+        if (ativo) setBackupPendente(false);
+      });
+    return () => {
+      ativo = false;
+    };
+  }, [view]);
 
   function navegar(proximaView: View) {
     setView(proximaView);
@@ -84,8 +108,14 @@ export function App() {
         return <CatalogoPage />;
       case "clientes":
         return <ClientesPage />;
+      case "bi":
+        return <BiPage />;
       case "configuracoes":
-        return <ConfiguracoesPage />;
+        return (
+          <ConfiguracoesPage
+            onBackupStatusChange={setBackupPendente}
+          />
+        );
       default:
         return (
           <PdvPage
@@ -116,6 +146,16 @@ export function App() {
           <span aria-hidden="true">●</span> {online ? "ONLINE" : "OFFLINE"}
         </span>
       </header>
+
+      {backupPendente && (
+        <div class={styles.backupAlert} role="alert">
+          <strong>BACKUP PENDENTE.</strong>
+          <span>Se o navegador for limpo, seu histórico pode ser perdido.</span>
+          <button type="button" onClick={() => navegar("configuracoes")}>
+            FAZER BACKUP AGORA
+          </button>
+        </div>
+      )}
 
       <div class={styles.workspace}>
         <aside class={styles.sidebar} aria-label="Navegação principal">

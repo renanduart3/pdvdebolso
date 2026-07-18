@@ -1,32 +1,56 @@
 import type { JSX } from "preact";
-import { useEffect, useState } from "preact/hooks";
+import { useCallback, useEffect, useState } from "preact/hooks";
 
-import { configuracoesRepository } from "../../database/repositories";
+import {
+  backupRepository,
+  configuracoesRepository
+} from "../../database/repositories";
 import styles from "../shared/Management.module.css";
 
 function mensagemErro(error: unknown): string {
   return error instanceof Error ? error.message : "Não foi possível concluir.";
 }
 
-export function ConfiguracoesPage() {
+type ConfiguracoesPageProps = {
+  onBackupStatusChange?: (pendente: boolean) => void;
+};
+
+export function ConfiguracoesPage({
+  onBackupStatusChange
+}: ConfiguracoesPageProps) {
   const [chavePix, setChavePix] = useState("");
   const [persistente, setPersistente] = useState<boolean | null>(null);
+  const [ultimoBackup, setUltimoBackup] = useState<string | null>(null);
+  const [backupPendente, setBackupPendente] = useState(false);
+  const [arquivoImportacao, setArquivoImportacao] = useState<string | null>(null);
+  const [nomeArquivo, setNomeArquivo] = useState("");
+  const [confirmouSubstituicao, setConfirmouSubstituicao] = useState(false);
   const [processando, setProcessando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [sucesso, setSucesso] = useState<string | null>(null);
 
+  const carregarBackup = useCallback(async () => {
+    const [ultimo, pendente] = await Promise.all([
+      backupRepository.obterUltimoBackup(),
+      backupRepository.precisaBackup()
+    ]);
+    setUltimoBackup(ultimo);
+    setBackupPendente(pendente);
+    return pendente;
+  }, []);
+
   useEffect(() => {
-    configuracoesRepository
-      .obterChavePix()
-      .then(setChavePix)
-      .catch((error: unknown) => setErro(mensagemErro(error)));
+    Promise.all([
+      configuracoesRepository.obterChavePix().then(setChavePix),
+      carregarBackup()
+    ]).catch((error: unknown) => setErro(mensagemErro(error)));
 
     if (navigator.storage?.persisted) {
       navigator.storage.persisted().then(setPersistente).catch(() => {
         setPersistente(null);
       });
     }
-  }, []);
+  }, [carregarBackup]);
 
   async function salvarPix(event: JSX.TargetedSubmitEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -58,6 +82,77 @@ export function ConfiguracoesPage() {
           ? "Proteção extra de armazenamento ativada."
           : "O navegador não concedeu proteção extra. O backup continua essencial."
       );
+    } catch (error: unknown) {
+      setErro(mensagemErro(error));
+    } finally {
+      setProcessando(false);
+    }
+  }
+
+  async function exportarBackup() {
+    setProcessando(true);
+    setErro(null);
+    setSucesso(null);
+    try {
+      const exportado = await backupRepository.exportar();
+      const blob = new Blob([exportado.conteudo], {
+        type: "application/json;charset=utf-8"
+      });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = exportado.nome_arquivo;
+      link.style.display = "none";
+      document.body.append(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1_000);
+      setUltimoBackup(exportado.exportado_em);
+      setBackupPendente(false);
+      setSucesso("Backup gerado. Guarde o arquivo em um lugar seguro.");
+      onBackupStatusChange?.(false);
+    } catch (error: unknown) {
+      setErro(mensagemErro(error));
+    } finally {
+      setProcessando(false);
+    }
+  }
+
+  async function selecionarArquivo(
+    event: JSX.TargetedEvent<HTMLInputElement, Event>
+  ) {
+    const arquivo = event.currentTarget.files?.[0];
+    setArquivoImportacao(null);
+    setNomeArquivo("");
+    setConfirmouSubstituicao(false);
+    if (!arquivo) return;
+
+    try {
+      setArquivoImportacao(await arquivo.text());
+      setNomeArquivo(arquivo.name);
+    } catch {
+      setErro("Não foi possível ler o arquivo selecionado.");
+    }
+  }
+
+  async function importarBackup() {
+    if (!arquivoImportacao || !confirmouSubstituicao) return;
+    setProcessando(true);
+    setErro(null);
+    setSucesso(null);
+    try {
+      const importado = await backupRepository.importar(arquivoImportacao);
+      setChavePix(await configuracoesRepository.obterChavePix());
+      const pendente = await carregarBackup();
+      setArquivoImportacao(null);
+      setNomeArquivo("");
+      setConfirmouSubstituicao(false);
+      setSucesso(
+        `Backup de ${new Intl.DateTimeFormat("pt-BR").format(
+          new Date(importado.exportado_em)
+        )} restaurado com sucesso.`
+      );
+      onBackupStatusChange?.(pendente);
     } catch (error: unknown) {
       setErro(mensagemErro(error));
     } finally {
@@ -133,10 +228,84 @@ export function ConfiguracoesPage() {
               PROTEGER DADOS NESTE DISPOSITIVO
             </button>
           )}
+        </section>
+
+        <section
+          class={`${styles.panel} ${styles.widePanel} ${
+            backupPendente ? styles.dangerPanel : ""
+          }`}
+        >
+          <div class={styles.panelTitle}>
+            <span>03</span>
+            <h2>BACKUP E RESTAURAÇÃO</h2>
+          </div>
           <p>
-            Exportação, importação e lembrete quinzenal de backup serão
-            adicionados aqui na Etapa 4.
+            Exporte clientes, catálogo, transações e configurações para um
+            arquivo JSON. Faça isso pelo menos a cada 14 dias.
           </p>
+          <span class={styles.tag}>
+            {ultimoBackup
+              ? `ÚLTIMO BACKUP: ${new Intl.DateTimeFormat("pt-BR").format(
+                  new Date(ultimoBackup)
+                )}`
+              : "NENHUM BACKUP REGISTRADO"}
+          </span>
+          {backupPendente && (
+            <p class={styles.dangerText}>
+              BACKUP PENDENTE: SE O NAVEGADOR FOR LIMPO, SEUS DADOS PODEM SER
+              PERDIDOS.
+            </p>
+          )}
+          <button
+            class={styles.button}
+            type="button"
+            onClick={exportarBackup}
+            disabled={processando}
+          >
+            {processando ? "PROCESSANDO..." : "EXPORTAR BANCO DE DADOS"}
+          </button>
+
+          <div class={styles.importArea}>
+            <h3>RESTAURAR UM BACKUP</h3>
+            <p>
+              A restauração valida o arquivo primeiro e depois substitui todos
+              os dados atuais em uma única operação.
+            </p>
+            <label htmlFor="backup-file">
+              ARQUIVO JSON
+              <input
+                id="backup-file"
+                class={styles.fileInput}
+                type="file"
+                accept="application/json,.json"
+                onChange={selecionarArquivo}
+              />
+            </label>
+            {nomeArquivo && <span class={styles.tag}>{nomeArquivo}</span>}
+            <label class={styles.checkLabel}>
+              <input
+                type="checkbox"
+                checked={confirmouSubstituicao}
+                onChange={(event) =>
+                  setConfirmouSubstituicao(event.currentTarget.checked)
+                }
+                disabled={!arquivoImportacao}
+              />
+              CONFIRMO QUE O BACKUP SUBSTITUIRÁ OS DADOS ATUAIS
+            </label>
+            <button
+              class={styles.secondaryButton}
+              type="button"
+              onClick={importarBackup}
+              disabled={
+                processando ||
+                !arquivoImportacao ||
+                !confirmouSubstituicao
+              }
+            >
+              IMPORTAR E SUBSTITUIR
+            </button>
+          </div>
         </section>
       </div>
     </main>

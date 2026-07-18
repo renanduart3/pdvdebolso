@@ -139,4 +139,73 @@ describe("App", () => {
     expect(screen.queryByLabelText("NOME *")).not.toBeInTheDocument();
     expect(screen.queryByLabelText("CHAVE PIX")).not.toBeInTheDocument();
   });
+
+  it("abre o painel de inteligência com dados calculados localmente", async () => {
+    const produtoId = crypto.randomUUID();
+    await database.catalogo.add({
+      id: produtoId,
+      nome: "Café",
+      preco_padrao_centavos: 500,
+      tipo: "PRODUTO",
+      estoque_quantidade: null,
+      ativo: true
+    });
+    await database.transacoes.add({
+      id: crypto.randomUUID(),
+      data_hora: new Date().toISOString(),
+      tipo: "VENDA",
+      cliente_id: null,
+      venda_id: null,
+      data_vencimento: null,
+      valor_total_centavos: 1000,
+      status_pagamento: "PAGO",
+      metodo_pagamento: "PIX",
+      itens: [
+        {
+          id_produto: produtoId,
+          nome_produto: "Café",
+          quantidade: 2,
+          preco_unitario_centavos: 500
+        }
+      ]
+    });
+    render(<App />);
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Inteligência" })
+    );
+
+    expect(
+      await screen.findByRole("heading", { name: "NEGÓCIO EM NÚMEROS." })
+    ).toBeInTheDocument();
+    expect(screen.getByText("PRODUTOS CAMPEÕES")).toBeInTheDocument();
+    expect((await screen.findAllByText("R$ 10,00")).length).toBeGreaterThan(0);
+  });
+
+  it("alerta quando existem dados sem backup e leva às configurações", async () => {
+    await database.catalogo.add({
+      id: crypto.randomUUID(),
+      nome: "Serviço",
+      preco_padrao_centavos: 1000,
+      tipo: "SERVICO",
+      estoque_quantidade: null,
+      ativo: true
+    });
+    render(<App />);
+
+    const botaoBackup = await screen.findByRole("button", {
+      name: "FAZER BACKUP AGORA"
+    });
+    fireEvent.click(botaoBackup);
+
+    expect(
+      await screen.findByRole("heading", { name: "BACKUP E RESTAURAÇÃO" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "EXPORTAR BANCO DE DADOS" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "IMPORTAR E SUBSTITUIR" })
+    ).toBeDisabled();
+  });
 });

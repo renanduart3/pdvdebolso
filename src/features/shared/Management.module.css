@@ -294,6 +294,42 @@
   background: var(--color-orange);
 }
 
+.widePanel {
+  grid-column: 1 / -1;
+}
+
+.dangerPanel {
+  background: var(--color-pink);
+}
+
+.dangerText {
+  padding: 12px;
+  border: var(--border);
+  background: var(--color-white);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 900;
+}
+
+.importArea {
+  display: grid;
+  margin-top: 8px;
+  padding-top: 18px;
+  gap: 12px;
+  border-top: var(--border-heavy);
+}
+
+.importArea h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+}
+
+.fileInput {
+  padding: 8px;
+  background: var(--color-white);
+}
+
 .warningPanel p,
 .panel p {
   margin: 0;
