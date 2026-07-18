@@ -1,0 +1,5 @@
+interface:
+  display_name: "Negociador Cloudflare"
+  short_description: "Worker, KV e pagamentos Mercado Pago"
+  default_prompt: "Use $cloudflare-payment-worker para implementar a infraestrutura de pagamento do PDV de Bolso."
+

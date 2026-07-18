@@ -1,0 +1,5 @@
+interface:
+  display_name: "Mecânico de IndexedDB"
+  short_description: "Persistência, consultas e backup local"
+  default_prompt: "Use $indexeddb-mechanic para implementar uma operação de dados local com segurança."
+

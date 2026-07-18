@@ -1,0 +1,353 @@
+.main {
+  width: min(100%, 1180px);
+  margin-inline: auto;
+  padding: clamp(24px, 4vw, 52px);
+}
+
+.hero {
+  padding-bottom: 26px;
+  border-bottom: var(--border-heavy);
+}
+
+.eyebrow,
+.tag {
+  display: inline-block;
+  padding: 5px 8px;
+  border: var(--border);
+  background: var(--color-white);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 900;
+}
+
+.hero h1 {
+  margin: 14px 0 8px;
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 7vw, 6.2rem);
+  line-height: 0.86;
+  letter-spacing: -0.07em;
+}
+
+.hero p {
+  max-width: 720px;
+  margin: 0;
+  font-weight: 800;
+}
+
+.notice {
+  display: grid;
+  margin-top: 24px;
+  padding: 12px 14px;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 8px;
+  border: var(--border);
+  box-shadow: var(--shadow-small);
+  font-weight: 800;
+}
+
+.notice button {
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--color-black);
+  background: var(--color-white);
+  font-weight: 900;
+}
+
+.error {
+  background: var(--color-pink);
+}
+
+.success {
+  background: var(--color-green);
+}
+
+.grid {
+  display: grid;
+  margin-top: 32px;
+  gap: 28px;
+  grid-template-columns: minmax(320px, 0.75fr) minmax(0, 1.25fr);
+  align-items: start;
+}
+
+.panel {
+  display: grid;
+  padding: 20px;
+  gap: 15px;
+  border: var(--border-heavy);
+  background: var(--color-white);
+  box-shadow: var(--shadow);
+}
+
+.sticky {
+  position: sticky;
+  top: 106px;
+}
+
+.panelTitle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 12px;
+  border-bottom: var(--border);
+}
+
+.panelTitle span {
+  padding: 5px 7px;
+  border: var(--border);
+  background: var(--color-purple);
+  font-family: var(--font-mono);
+  font-weight: 900;
+}
+
+.panelTitle h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 3vw, 2.2rem);
+}
+
+.panel label,
+.field {
+  display: grid;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.panel input,
+.panel textarea,
+.panel select,
+.card input {
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 12px;
+  border: var(--border);
+  border-radius: 0;
+  background: var(--color-white);
+  color: var(--color-black);
+  font: 800 1rem/1.2 var(--font-body);
+}
+
+.panel textarea {
+  resize: vertical;
+}
+
+.choiceGrid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.choiceGrid label,
+.checkLabel {
+  display: flex;
+  min-height: 48px;
+  padding: 10px;
+  align-items: center;
+  gap: 9px;
+  border: var(--border);
+  background: var(--color-paper);
+  cursor: pointer;
+}
+
+.choiceGrid input,
+.checkLabel input {
+  width: 22px;
+  min-height: 22px;
+  margin: 0;
+  accent-color: var(--color-pink);
+}
+
+.button,
+.secondaryButton {
+  display: grid;
+  min-height: 50px;
+  padding: 10px 14px;
+  place-items: center;
+  border: var(--border);
+  background: var(--color-green);
+  box-shadow: var(--shadow-small);
+  color: var(--color-black);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 900;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.secondaryButton {
+  background: var(--color-purple);
+}
+
+.list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  gap: 16px;
+  list-style: none;
+}
+
+.card {
+  display: grid;
+  border: var(--border-heavy);
+  background: var(--color-white);
+}
+
+.cardMain {
+  display: grid;
+  padding: 16px;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+}
+
+.card h3 {
+  margin: 8px 0 3px;
+  font-family: var(--font-display);
+  font-size: 1.55rem;
+  text-transform: uppercase;
+}
+
+.card p,
+.card small {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.cardValue {
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+  white-space: nowrap;
+}
+
+.cardActions {
+  display: grid;
+  padding: 12px;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border-top: var(--border);
+  background: var(--color-paper);
+}
+
+.cardActions button {
+  min-height: 44px;
+  padding: 8px 10px;
+  border: var(--border);
+  background: var(--color-purple);
+  box-shadow: var(--shadow-small);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.stockForm {
+  display: grid;
+  grid-template-columns: minmax(100px, 1fr) auto;
+  gap: 10px;
+}
+
+.stockForm button {
+  min-height: 48px;
+  padding: 8px 12px;
+  border: var(--border);
+  background: var(--color-green);
+  box-shadow: var(--shadow-small);
+  font-weight: 900;
+}
+
+.empty {
+  display: grid;
+  min-height: 210px;
+  padding: 30px;
+  place-content: center;
+  gap: 8px;
+  border: var(--border-heavy);
+  background: var(--color-white);
+  text-align: center;
+}
+
+.empty strong {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+}
+
+.empty span {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+.settingsGrid {
+  display: grid;
+  margin-top: 32px;
+  gap: 26px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+}
+
+.warningPanel {
+  background: var(--color-orange);
+}
+
+.warningPanel p,
+.panel p {
+  margin: 0;
+  font-weight: 750;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  filter: grayscale(0.7);
+  opacity: 0.65;
+}
+
+@media (hover: hover) {
+  .button:not(:disabled):hover,
+  .secondaryButton:not(:disabled):hover,
+  .cardActions button:not(:disabled):hover,
+  .stockForm button:not(:disabled):hover {
+    box-shadow: 2px 2px 0 var(--color-black);
+    transform: translate(2px, 2px);
+  }
+}
+
+@media (max-width: 900px) {
+  .grid,
+  .settingsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .sticky {
+    position: static;
+  }
+}
+
+@media (max-width: 820px) {
+  .main {
+    padding: 20px 12px 112px;
+  }
+}
+
+@media (max-width: 520px) {
+  .cardMain,
+  .cardActions {
+    grid-template-columns: 1fr;
+  }
+
+  .cardValue {
+    white-space: normal;
+  }
+
+  .notice {
+    grid-template-columns: 1fr auto;
+  }
+
+  .notice strong {
+    grid-column: 1 / -1;
+  }
+}

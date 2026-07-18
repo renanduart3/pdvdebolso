@@ -1,0 +1,28 @@
+:root {
+  --color-black: #000000;
+  --color-white: #ffffff;
+  --color-paper: #f4f0e8;
+  --color-green: #b8ff29;
+  --color-orange: #ff8b2c;
+  --color-purple: #b288ff;
+  --color-pink: #ff2c85;
+  --color-danger: #ff3b30;
+
+  --font-display: "Arial Black", "Arial Narrow", Impact, sans-serif;
+  --font-body: "Arial", "Helvetica Neue", sans-serif;
+  --font-mono: "Roboto Mono", "Courier New", monospace;
+
+  --border: 3px solid var(--color-black);
+  --border-heavy: 4px solid var(--color-black);
+  --shadow: 6px 6px 0 0 var(--color-black);
+  --shadow-small: 4px 4px 0 0 var(--color-black);
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+}
+

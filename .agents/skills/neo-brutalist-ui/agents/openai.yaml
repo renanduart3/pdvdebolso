@@ -1,0 +1,5 @@
+interface:
+  display_name: "Pintor Neo-Brutalista"
+  short_description: "Interface Preact neo-brutalista consistente"
+  default_prompt: "Use $neo-brutalist-ui para criar uma interface fiel ao styleguide do PDV de Bolso."
+

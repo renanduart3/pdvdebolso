@@ -1,0 +1,12 @@
+name = "caderno-autonomo-pagamentos"
+main = "src/index.js"
+compatibility_date = "2026-01-01"
+
+# Crie o namespace com: npx wrangler kv namespace create PAGAMENTOS
+# e cole o id retornado aqui embaixo.
+[[kv_namespaces]]
+binding = "PAGAMENTOS"
+id = "COLE_AQUI_O_ID_DO_NAMESPACE"
+
+# Segredos NÃO ficam neste arquivo. Configure com:
+#   npx wrangler secret put MP_ACCESS_TOKEN
