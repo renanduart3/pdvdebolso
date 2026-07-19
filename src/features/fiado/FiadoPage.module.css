@@ -1,12 +1,12 @@
 .main {
   width: min(100%, 1320px);
   margin-inline: auto;
-  padding: clamp(24px, 4vw, 52px);
+  padding: clamp(18px, 2.5vw, 34px);
 }
 
 .hero {
   display: grid;
-  padding-bottom: 28px;
+  padding-bottom: 16px;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: end;
   gap: 32px;
@@ -27,10 +27,10 @@
 }
 
 .hero h1 {
-  margin: 14px 0 8px;
+  margin: 9px 0 5px;
   font-family: var(--font-display);
-  font-size: clamp(3rem, 7vw, 6.5rem);
-  line-height: 0.86;
+  font-size: clamp(1.85rem, 3.6vw, 3.75rem);
+  line-height: 0.9;
   letter-spacing: -0.07em;
 }
 
@@ -42,8 +42,8 @@
 
 .debtCard {
   display: grid;
-  min-width: 280px;
-  padding: 18px;
+  min-width: 230px;
+  padding: 12px 14px;
   gap: 4px;
   border: var(--border-heavy);
   background: var(--color-pink);
@@ -58,7 +58,7 @@
 
 .debtCard strong {
   font-family: var(--font-display);
-  font-size: 2.2rem;
+  font-size: 1.4rem;
   letter-spacing: -0.05em;
 }
 
@@ -137,6 +137,243 @@
   box-shadow: var(--shadow);
 }
 
+.entrySection {
+  margin-top: 24px;
+  border: var(--border-heavy);
+  background: var(--color-white);
+  box-shadow: var(--shadow);
+}
+
+.entryGrid {
+  display: grid;
+  padding: 14px;
+  grid-template-columns: minmax(180px, 1fr) minmax(150px, 0.6fr) minmax(220px, 1.3fr);
+  gap: 12px;
+}
+
+.entryGrid label,
+.itemPicker label,
+.avulsoField {
+  display: grid;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 900;
+}
+
+.entryGrid input,
+.entryGrid select,
+.itemPicker input,
+.avulsoField input {
+  width: 100%;
+  min-height: 42px;
+  padding: 8px 10px;
+  border: var(--border);
+  border-radius: 0;
+  background: var(--color-white);
+  font-weight: 800;
+}
+
+.clientPicker {
+  position: relative;
+  min-width: 0;
+}
+
+.clientPicker > label {
+  display: grid;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 900;
+}
+
+.clientSuggestions {
+  position: absolute;
+  z-index: 12;
+  top: calc(100% + 5px);
+  right: 0;
+  left: 0;
+  display: grid;
+  max-height: 260px;
+  margin: 0;
+  padding: 6px;
+  gap: 5px;
+  overflow-y: auto;
+  border: var(--border);
+  background: var(--color-white);
+  box-shadow: var(--shadow-small);
+  list-style: none;
+}
+
+.clientSuggestions button {
+  display: flex;
+  width: 100%;
+  min-height: 42px;
+  padding: 7px 9px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border: 2px solid var(--color-black);
+  background: var(--color-white);
+  text-align: left;
+  cursor: pointer;
+}
+
+.clientSuggestions button span,
+.clientHint,
+.selectedClient small {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  font-weight: 900;
+}
+
+.clientHint {
+  display: block;
+  margin-top: 5px;
+}
+
+.selectedClient {
+  display: flex;
+  min-height: 42px;
+  margin-top: 6px;
+  padding-left: 9px;
+  align-items: center;
+  justify-content: space-between;
+  border: var(--border);
+  background: var(--color-green);
+}
+
+.selectedClient > span {
+  display: grid;
+}
+
+.selectedClient button {
+  width: 40px;
+  align-self: stretch;
+  border: 0;
+  border-left: var(--border);
+  background: var(--color-white);
+  font-weight: 900;
+}
+
+.modeChoice {
+  display: grid;
+  padding: 0 14px 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.modeChoice button,
+.cancelEdit {
+  min-height: 42px;
+  padding: 7px 10px;
+  border: var(--border);
+  background: var(--color-white);
+  box-shadow: var(--shadow-small);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.modeChoice .modeActive {
+  background: var(--color-green);
+  box-shadow: 2px 2px 0 var(--color-black);
+  transform: translate(2px, 2px);
+}
+
+.cancelEdit {
+  background: var(--color-white);
+}
+
+.itemPicker,
+.avulsoField {
+  position: relative;
+  display: grid;
+  margin: 0 14px 14px;
+  padding: 12px;
+  gap: 10px;
+  border: var(--border);
+  background: var(--color-paper);
+}
+
+.avulsoField {
+  max-width: 420px;
+}
+
+.itemSuggestions,
+.selectedItems {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  gap: 7px;
+  list-style: none;
+}
+
+.itemSuggestions button,
+.selectedItems li {
+  display: flex;
+  width: 100%;
+  min-height: 42px;
+  padding: 7px 9px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border: var(--border);
+  background: var(--color-white);
+  font-weight: 900;
+}
+
+.itemSuggestions button {
+  cursor: pointer;
+}
+
+.selectedItems li > div {
+  display: grid;
+  grid-template-columns: 34px 38px 34px;
+  border: 2px solid var(--color-black);
+}
+
+.selectedItems li > div > * {
+  display: grid;
+  min-height: 32px;
+  place-items: center;
+  border: 0;
+  background: var(--color-white);
+  font-weight: 900;
+}
+
+.selectedItems li > div strong {
+  border-inline: 2px solid var(--color-black);
+}
+
+.entryFooter {
+  display: flex;
+  padding: 12px 14px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  border-top: var(--border-heavy);
+  background: var(--color-orange);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 900;
+}
+
+.entryFooter strong {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+}
+
+.entryFooter button {
+  min-height: 46px;
+  padding: 8px 16px;
+  border: var(--border);
+  background: var(--color-green);
+  box-shadow: var(--shadow-small);
+  font-weight: 900;
+}
+
 .accountsHeader {
   display: flex;
   min-height: 78px;
@@ -157,7 +394,7 @@
 .accountsHeader h2 {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(1.6rem, 3vw, 2.5rem);
+  font-size: clamp(1.3rem, 2.4vw, 2rem);
 }
 
 .accountsList {
@@ -195,7 +432,7 @@
 .accountTop h3 {
   margin: 9px 0 3px;
   font-family: var(--font-display);
-  font-size: clamp(1.5rem, 3vw, 2.2rem);
+  font-size: clamp(1.2rem, 2.4vw, 1.75rem);
   text-transform: uppercase;
 }
 
@@ -222,20 +459,62 @@
 
 .balance strong {
   font-family: var(--font-display);
-  font-size: 2rem;
+  font-size: 1.6rem;
 }
 
 .accountActions {
   display: grid;
   padding: 14px;
   gap: 12px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   border-top: var(--border);
   background: var(--color-paper);
 }
 
 .accountActions button {
   background: var(--color-purple);
+}
+
+.accountActions .deleteDebt {
+  background: var(--color-pink);
+}
+
+.confirmDelete {
+  display: grid;
+  padding: 14px;
+  gap: 7px;
+  border-top: var(--border-heavy);
+  background: var(--color-pink);
+}
+
+.confirmDelete strong {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+}
+
+.confirmDelete span {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 900;
+}
+
+.confirmDelete > div {
+  display: grid;
+  margin-top: 5px;
+  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.confirmDelete button {
+  min-height: 42px;
+  border: var(--border);
+  background: var(--color-white);
+  box-shadow: var(--shadow-small);
+  font-weight: 900;
+}
+
+.confirmDelete button:last-child {
+  background: var(--color-green);
 }
 
 .noPhone {
@@ -327,6 +606,14 @@ button:disabled {
   .paymentForm {
     grid-template-columns: 1fr;
   }
+
+  .entryGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .accountActions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 560px) {
@@ -353,6 +640,16 @@ button:disabled {
 
   .accountActions {
     grid-template-columns: 1fr;
+  }
+
+  .modeChoice,
+  .confirmDelete > div {
+    grid-template-columns: 1fr;
+  }
+
+  .entryFooter {
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .notice {

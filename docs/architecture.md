@@ -50,6 +50,12 @@ flowchart LR
 - Emite ou disponibiliza a licença de remoção de anúncios.
 - Usa Workers KV apenas para estado de pagamento/licença.
 - Não recebe dados comerciais nem funciona como API do PDV.
+- Expõe somente rotas versionadas em `/v1/licencas`, `/v1/webhooks` e
+  `/v1/saude`.
+- Define o preço da licença no servidor e exige idempotência na criação do
+  checkout.
+- Assina códigos restauráveis sem armazenar o segredo ou o código em texto
+  aberto.
 
 ### Anúncios
 

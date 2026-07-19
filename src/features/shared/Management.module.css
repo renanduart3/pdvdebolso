@@ -1,11 +1,11 @@
 .main {
-  width: min(100%, 1180px);
+  width: min(100%, 1320px);
   margin-inline: auto;
-  padding: clamp(24px, 4vw, 52px);
+  padding: clamp(18px, 2.5vw, 34px);
 }
 
 .hero {
-  padding-bottom: 26px;
+  padding-bottom: 16px;
   border-bottom: var(--border-heavy);
 }
 
@@ -21,10 +21,10 @@
 }
 
 .hero h1 {
-  margin: 14px 0 8px;
+  margin: 9px 0 5px;
   font-family: var(--font-display);
-  font-size: clamp(3rem, 7vw, 6.2rem);
-  line-height: 0.86;
+  font-size: clamp(1.85rem, 3.6vw, 3.75rem);
+  line-height: 0.9;
   letter-spacing: -0.07em;
 }
 
@@ -36,7 +36,7 @@
 
 .notice {
   display: grid;
-  margin-top: 24px;
+  margin-top: 14px;
   padding: 12px 14px;
   grid-template-columns: auto 1fr auto;
   align-items: center;
@@ -72,8 +72,8 @@
 
 .panel {
   display: grid;
-  padding: 20px;
-  gap: 15px;
+  padding: 16px;
+  gap: 12px;
   border: var(--border-heavy);
   background: var(--color-white);
   box-shadow: var(--shadow);
@@ -103,7 +103,7 @@
 .panelTitle h2 {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(1.5rem, 3vw, 2.2rem);
+  font-size: clamp(1rem, 1.6vw, 1.4rem);
 }
 
 .panel label,
@@ -120,8 +120,8 @@
 .panel select,
 .card input {
   width: 100%;
-  min-height: 48px;
-  padding: 10px 12px;
+  min-height: 42px;
+  padding: 8px 10px;
   border: var(--border);
   border-radius: 0;
   background: var(--color-white);
@@ -142,8 +142,8 @@
 .choiceGrid label,
 .checkLabel {
   display: flex;
-  min-height: 48px;
-  padding: 10px;
+  min-height: 42px;
+  padding: 8px;
   align-items: center;
   gap: 9px;
   border: var(--border);
@@ -159,10 +159,84 @@
   accent-color: var(--color-pink);
 }
 
+.themeGrid {
+  display: grid;
+  gap: 10px;
+}
+
+.themeOption,
+.themeOptionSelected {
+  display: grid;
+  min-height: 86px;
+  padding: 11px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 11px;
+  border: var(--border);
+  background: var(--color-paper);
+  cursor: pointer;
+}
+
+.themeOptionSelected {
+  background: var(--color-green);
+  box-shadow: var(--shadow-small);
+}
+
+.themeOption input,
+.themeOptionSelected input {
+  width: 22px;
+  min-height: 22px;
+  margin: 0;
+  accent-color: var(--color-pink);
+}
+
+.themeOption > span,
+.themeOptionSelected > span {
+  display: grid;
+  gap: 4px;
+}
+
+.themeOption strong,
+.themeOptionSelected strong {
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+}
+
+.themeOption small,
+.themeOptionSelected small {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.themeSwatches {
+  display: flex;
+  gap: 3px;
+}
+
+.themeSwatches span {
+  width: 17px;
+  height: 34px;
+  border: 2px solid var(--color-black);
+}
+
+.themeSwatches span:nth-child(1) {
+  background: var(--color-green);
+}
+
+.themeSwatches span:nth-child(2) {
+  background: var(--color-purple);
+}
+
+.themeSwatches span:nth-child(3) {
+  background: var(--color-orange);
+}
+
 .button,
 .secondaryButton {
   display: grid;
-  min-height: 50px;
+  min-height: 44px;
   padding: 10px 14px;
   place-items: center;
   border: var(--border);
@@ -185,7 +259,7 @@
   display: grid;
   margin: 0;
   padding: 0;
-  gap: 16px;
+  gap: 12px;
   list-style: none;
 }
 
@@ -197,16 +271,16 @@
 
 .cardMain {
   display: grid;
-  padding: 16px;
-  gap: 12px;
+  padding: 13px;
+  gap: 10px;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: start;
 }
 
 .card h3 {
-  margin: 8px 0 3px;
+  margin: 6px 0 2px;
   font-family: var(--font-display);
-  font-size: 1.55rem;
+  font-size: 1.28rem;
   text-transform: uppercase;
 }
 
@@ -221,7 +295,7 @@
 
 .cardValue {
   font-family: var(--font-display);
-  font-size: 1.7rem;
+  font-size: 1.4rem;
   white-space: nowrap;
 }
 
@@ -244,6 +318,176 @@
   font-size: 0.7rem;
   font-weight: 900;
   cursor: pointer;
+}
+
+.whatsappAction,
+.mutedAction {
+  display: grid;
+  min-height: 44px;
+  padding: 8px 10px;
+  place-items: center;
+  border: var(--border);
+  background: var(--color-green);
+  box-shadow: var(--shadow-small);
+  color: var(--color-black);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 900;
+  text-align: center;
+  text-decoration: none;
+}
+
+.mutedAction {
+  background: #ddd;
+  box-shadow: none;
+}
+
+.formPanel,
+.listPanel {
+  margin-top: 20px;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: minmax(190px, 0.75fr) minmax(220px, 1.25fr) minmax(160px, 0.7fr) minmax(190px, 1fr) auto;
+  align-items: end;
+  gap: 12px;
+}
+
+.clientFormGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(180px, 1fr));
+  align-items: end;
+  gap: 12px;
+}
+
+.notesField {
+  grid-column: span 2;
+}
+
+.formGrid > .button {
+  min-width: 170px;
+}
+
+.formActions {
+  display: grid;
+  gap: 8px;
+}
+
+.fieldHint {
+  display: grid;
+  min-height: 42px;
+  padding: 8px;
+  place-items: center;
+  border: var(--border);
+  background: var(--color-paper);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 900;
+  text-align: center;
+}
+
+.stockSetup {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: end;
+}
+
+.listToolbar {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) auto;
+  align-items: end;
+  gap: 14px;
+}
+
+.resultCount {
+  padding: 7px 9px;
+  border: var(--border);
+  background: var(--color-green);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 900;
+}
+
+.compactList {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.stockForm {
+  padding: 10px 12px;
+  border-top: var(--border);
+  background: var(--color-paper);
+}
+
+.singleAction {
+  grid-template-columns: minmax(0, 260px);
+  justify-content: end;
+}
+
+.cardActions .dangerButton,
+.dangerButton {
+  background: var(--color-pink);
+}
+
+.confirmAction {
+  display: grid;
+  padding: 12px;
+  gap: 6px;
+  border-top: var(--border-heavy);
+  background: var(--color-pink);
+}
+
+.confirmAction strong {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  text-transform: uppercase;
+}
+
+.confirmAction span {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 900;
+}
+
+.confirmAction > div {
+  display: grid;
+  margin-top: 5px;
+  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.confirmAction button,
+.pagination button {
+  min-height: 40px;
+  padding: 7px 10px;
+  border: var(--border);
+  background: var(--color-white);
+  box-shadow: var(--shadow-small);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.confirmAction button:last-child {
+  background: var(--color-green);
+}
+
+.pagination {
+  display: grid;
+  padding-top: 12px;
+  grid-template-columns: minmax(120px, auto) 1fr minmax(120px, auto);
+  align-items: center;
+  gap: 12px;
+  border-top: var(--border);
+}
+
+.pagination span {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 900;
+  text-align: center;
 }
 
 .stockForm {
@@ -325,6 +569,28 @@
   font-size: 1.35rem;
 }
 
+.licenseArea {
+  display: grid;
+  margin-top: 6px;
+  padding-top: 14px;
+  gap: 10px;
+  border-top: var(--border);
+}
+
+.licenseArea h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1rem;
+}
+
+.licenseArea textarea {
+  min-height: 78px;
+  resize: vertical;
+  overflow-wrap: anywhere;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+}
+
 .fileInput {
   padding: 8px;
   background: var(--color-white);
@@ -346,7 +612,10 @@ button:disabled {
   .button:not(:disabled):hover,
   .secondaryButton:not(:disabled):hover,
   .cardActions button:not(:disabled):hover,
-  .stockForm button:not(:disabled):hover {
+  .stockForm button:not(:disabled):hover,
+  .whatsappAction:hover,
+  .confirmAction button:not(:disabled):hover,
+  .pagination button:not(:disabled):hover {
     box-shadow: 2px 2px 0 var(--color-black);
     transform: translate(2px, 2px);
   }
@@ -360,6 +629,18 @@ button:disabled {
 
   .sticky {
     position: static;
+  }
+
+  .formGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .clientFormGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .formGrid > .button {
+    min-width: 0;
   }
 }
 
@@ -377,6 +658,27 @@ button:disabled {
 
   .cardValue {
     white-space: normal;
+  }
+
+  .formGrid,
+  .clientFormGrid,
+  .stockSetup,
+  .listToolbar,
+  .compactList,
+  .pagination {
+    grid-template-columns: 1fr;
+  }
+
+  .notesField {
+    grid-column: auto;
+  }
+
+  .pagination {
+    text-align: center;
+  }
+
+  .singleAction {
+    justify-content: stretch;
   }
 
   .notice {

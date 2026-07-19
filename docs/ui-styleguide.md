@@ -1,7 +1,13 @@
-# UI/UX STYLEGUIDE — NEO-BRUTALISM
+# UI/UX STYLEGUIDE — TEMAS DA APLICAÇÃO
 
-A interface deve ser estritamente desenvolvida usando o estilo Neo-Brutalismo.
-Ignore convenções de Material Design ou Flat Design suave.
+O tema padrão `IMPACTO` deve ser estritamente desenvolvido usando o estilo
+Neo-Brutalismo. Ignore convenções de Material Design ou Flat Design suave ao
+trabalhar nesse tema.
+
+O tema `CONFORTO` é uma variação oficial de menor contraste. Componentes não
+devem criar condicionais específicas para cada tema: use sempre os tokens CSS.
+Novos temas devem ser adicionados ao registro central e implementar o mesmo
+conjunto de tokens, sem duplicar componentes ou lógica de negócio.
 
 ## 1. Tipografia — agressiva e grande
 
@@ -70,3 +76,10 @@ border-bottom: 3px solid #000000;
   exportar backup ou cobrar cliente.
 - Não use bibliotecas visuais que imponham Material Design.
 
+## 7. Tema Conforto
+
+- Use fundo frio claro, texto azul-acinzentado e cores de destaque dessaturadas.
+- Use bordas de `1px`, cantos arredondados e sombras suaves definidas por tokens.
+- Preserve contraste acessível, hierarquia, estados de foco e alvos de toque.
+- Não altere layout, semântica, conteúdo ou comportamento ao trocar de tema.
+- A preferência deve permanecer no IndexedDB e fazer parte do backup.

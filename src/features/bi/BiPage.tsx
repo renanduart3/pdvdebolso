@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "preact/hooks";
 import { formatarCentavos } from "../../database/money";
 import { biRepository } from "../../database/repositories";
 import type { IndicadoresBI } from "./calculos";
+import { criarXlsIndicadores } from "./exportarXls";
 import styles from "./BiPage.module.css";
 
 function mensagemErro(error: unknown): string {
@@ -16,6 +17,7 @@ function nomeMetodo(metodo: string): string {
 export function BiPage() {
   const [indicadores, setIndicadores] = useState<IndicadoresBI | null>(null);
   const [erro, setErro] = useState<string | null>(null);
+  const [exportado, setExportado] = useState(false);
 
   useEffect(() => {
     biRepository
@@ -62,17 +64,41 @@ export function BiPage() {
     );
   }
 
+  const dadosParaExportacao = indicadores;
   const semMovimento =
     indicadores.caixa.mes_centavos === 0 &&
     indicadores.produtos.length === 0 &&
     indicadores.risco.vendas_mes_centavos === 0;
 
+  function exportarXls() {
+    const arquivo = criarXlsIndicadores(dadosParaExportacao);
+    const blob = new Blob([arquivo.conteudo], {
+      type: "application/vnd.ms-excel;charset=utf-8"
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = arquivo.nome_arquivo;
+    link.style.display = "none";
+    document.body.append(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1_000);
+    setExportado(true);
+  }
+
   return (
     <main class={styles.main}>
       <section class={styles.hero}>
-        <span class={styles.eyebrow}>INTELIGÊNCIA • 100% NO DISPOSITIVO</span>
+        <div class={styles.heroTop}>
+          <span class={styles.eyebrow}>INTELIGÊNCIA • 100% NO DISPOSITIVO</span>
+          <button class={styles.exportButton} type="button" onClick={exportarXls}>
+            EXPORTAR XLS
+          </button>
+        </div>
         <h1>NEGÓCIO EM NÚMEROS.</h1>
         <p>Sem planilha, sem nuvem e sem achismo. Seus próprios lançamentos contam a história.</p>
+        {exportado && <span class={styles.exportStatus} role="status">ARQUIVO XLS GERADO NESTE DISPOSITIVO.</span>}
       </section>
 
       {semMovimento && (

@@ -17,11 +17,26 @@ tarefa concluída.
 - Etapa 3 aprovada: clientes, venda fiada, pagamentos parciais, cobrança por
   WhatsApp, módulos separados de cadastro e schema v2 com produtos, serviços e
   estoque opcional.
+- Etapa 4 aprovada: BI client-side, backup e restauração, alertas na barra
+  superior, PDV compacto com busca e catálogo modal, desconto percentual,
+  CRUDs completos, estoque configurável e fiado manual auditável no schema v3.
+- Refinamento operacional aprovado: busca e checkout na primeira linha do PDV,
+  carrinho em largura total com rolagem e paginação de dez itens, além de
+  navegação móvel separada entre busca, carrinho e checkout.
+- Sistema de temas aprovado: registro extensível, tema `IMPACTO` como padrão e
+  tema `CONFORTO` persistido no IndexedDB e incluído no backup.
+- Fundação client-side de monetização aprovada: contrato substituível de
+  anúncios, slot que desaparece offline ou com licença, estado local de
+  pagamento e licença sem anúncios.
 
 ## [EM PROGRESSO]
 
-- Etapa 4: BI client-side, backup, importação e alertas de segurança dos dados.
+- Nenhuma etapa em execução. Aguardando o início da integração serverless.
 
 ## [PRÓXIMO]
 
-- Integrar anúncios, pagamento e licença sem anúncios.
+- Etapa 6: implementar o Cloudflare Worker, Mercado Pago Checkout Pro, webhook
+  assinado, idempotência, Workers KV e restauração da licença sem anúncios.
+- Conectar um provedor real de anúncios com consentimento e política de
+  privacidade, mantendo o PDV operacional quando o provedor falhar.
+- Preparar e validar o primeiro deploy de produção no Cloudflare Pages.

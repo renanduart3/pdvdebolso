@@ -71,7 +71,7 @@ function validarItens(itensEntrada: ItemTransacao[]): {
   }));
 
   for (const [index, item] of itens.entries()) {
-    if (!item.id_produto || !item.nome_produto) {
+    if (!item.nome_produto) {
       throw new TypeError(`O item ${index + 1} possui dados inválidos.`);
     }
   }
@@ -82,12 +82,18 @@ function validarItens(itensEntrada: ItemTransacao[]): {
   };
 }
 
+function normalizarDescricao(descricao?: string): string | null {
+  const normalizada = descricao?.trim().replace(/\s+/g, " ") ?? "";
+  return normalizada || null;
+}
+
 export class TransacoesRepository {
   constructor(private readonly db: PdvDeBolsoDatabase) {}
 
   private async baixarEstoque(itens: ItemTransacao[]): Promise<void> {
     const quantidades = new Map<string, number>();
     for (const item of itens) {
+      if (!item.id_produto) continue;
       quantidades.set(
         item.id_produto,
         (quantidades.get(item.id_produto) ?? 0) + item.quantidade
@@ -95,7 +101,10 @@ export class TransacoesRepository {
     }
 
     const ids = [...quantidades.keys()];
+    if (ids.length === 0) return;
     const catalogo = await this.db.catalogo.bulkGet(ids);
+    const validarEstoque =
+      (await this.db.configuracoes.get("validar_estoque_venda"))?.valor === true;
 
     for (const [index, item] of catalogo.entries()) {
       if (!item || !item.ativo) {
@@ -104,10 +113,10 @@ export class TransacoesRepository {
         );
       }
 
-      if (item.estoque_quantidade === null) continue;
+      if (item.tipo === "SERVICO" || item.estoque_quantidade === null) continue;
 
       const quantidadeVendida = quantidades.get(item.id) ?? 0;
-      if (item.estoque_quantidade < quantidadeVendida) {
+      if (validarEstoque && item.estoque_quantidade < quantidadeVendida) {
         throw new TypeError(
           `Estoque insuficiente para ${item.nome}. Disponível: ${item.estoque_quantidade}.`
         );
@@ -122,6 +131,7 @@ export class TransacoesRepository {
   async registrarVendaPaga(input: {
     itens: ItemTransacao[];
     metodo_pagamento: MetodoPagamento;
+    descricao?: string;
     data_hora?: string;
   }): Promise<Transacao> {
     const { itens, total_centavos } = validarItens(input.itens);
@@ -136,6 +146,7 @@ export class TransacoesRepository {
       valor_total_centavos: total_centavos,
       status_pagamento: "PAGO",
       metodo_pagamento: input.metodo_pagamento,
+      descricao: normalizarDescricao(input.descricao),
       itens
     };
 
@@ -143,6 +154,7 @@ export class TransacoesRepository {
       "rw",
       this.db.catalogo,
       this.db.transacoes,
+      this.db.configuracoes,
       async () => {
         await this.baixarEstoque(itens);
         await this.db.transacoes.add(transacao);
@@ -156,11 +168,12 @@ export class TransacoesRepository {
     itens: ItemTransacao[];
     cliente_id: string;
     data_vencimento: string;
+    descricao?: string;
     data_hora?: string;
   }): Promise<Transacao> {
     const cliente = await this.db.clientes.get(input.cliente_id);
 
-    if (!cliente) {
+    if (!cliente || !cliente.ativo) {
       throw new TypeError("Selecione um cliente válido para o fiado.");
     }
 
@@ -175,6 +188,7 @@ export class TransacoesRepository {
       valor_total_centavos: total_centavos,
       status_pagamento: "FIADO",
       metodo_pagamento: null,
+      descricao: normalizarDescricao(input.descricao),
       itens
     };
 
@@ -182,6 +196,7 @@ export class TransacoesRepository {
       "rw",
       this.db.catalogo,
       this.db.transacoes,
+      this.db.configuracoes,
       async () => {
         await this.baixarEstoque(itens);
         await this.db.transacoes.add(transacao);
@@ -204,12 +219,19 @@ export class TransacoesRepository {
 
     return this.db.transaction("rw", this.db.transacoes, async () => {
       const venda = await this.db.transacoes.get(input.venda_id);
+      const cancelada =
+        (await this.db.transacoes
+          .where("venda_id")
+          .equals(input.venda_id)
+          .filter((item) => item.tipo === "CANCELAMENTO_VENDA")
+          .count()) > 0;
 
       if (
         !venda ||
         venda.tipo !== "VENDA" ||
         !venda.cliente_id ||
-        venda.status_pagamento === "PAGO"
+        venda.status_pagamento === "PAGO" ||
+        cancelada
       ) {
         throw new Error("Venda fiada não encontrada.");
       }
@@ -239,6 +261,7 @@ export class TransacoesRepository {
         valor_total_centavos: input.valor_centavos,
         status_pagamento: "PAGO",
         metodo_pagamento: input.metodo_pagamento,
+        descricao: null,
         itens: []
       };
 
@@ -254,6 +277,14 @@ export class TransacoesRepository {
     ]);
     const clientesPorId = new Map(clientes.map((cliente) => [cliente.id, cliente]));
     const pagamentosPorVenda = new Map<string, number>();
+    const vendasCanceladas = new Set(
+      transacoes
+        .filter(
+          (transacao) =>
+            transacao.tipo === "CANCELAMENTO_VENDA" && transacao.venda_id
+        )
+        .map((transacao) => transacao.venda_id!)
+    );
 
     for (const transacao of transacoes) {
       if (transacao.tipo === "PAGAMENTO_FIADO" && transacao.venda_id) {
@@ -269,6 +300,7 @@ export class TransacoesRepository {
       .filter(
         (transacao) =>
           transacao.tipo === "VENDA" &&
+          !vendasCanceladas.has(transacao.id) &&
           transacao.status_pagamento !== "PAGO" &&
           Boolean(transacao.cliente_id && transacao.data_vencimento)
       )
@@ -301,14 +333,23 @@ export class TransacoesRepository {
 
   async obterResumoDoDia(data = new Date()): Promise<ResumoVendas> {
     const [inicio, fim] = inicioEFimDoDia(data);
-    const vendas = await this.db.transacoes
+    const transacoes = await this.db.transacoes
       .where("data_hora")
       .between(inicio, fim, true, false)
-      .filter(
-        (transacao) =>
-          transacao.tipo === "VENDA" && transacao.status_pagamento === "PAGO"
-      )
       .toArray();
+    const vendasCanceladas = new Set(
+      (await this.db.transacoes
+        .where("tipo")
+        .equals("CANCELAMENTO_VENDA")
+        .toArray())
+        .flatMap((item) => (item.venda_id ? [item.venda_id] : []))
+    );
+    const vendas = transacoes.filter(
+        (transacao) =>
+          transacao.tipo === "VENDA" &&
+          transacao.status_pagamento === "PAGO" &&
+          !vendasCanceladas.has(transacao.id)
+      );
 
     return vendas.reduce<ResumoVendas>(
       (resumo, venda) => ({
@@ -316,6 +357,91 @@ export class TransacoesRepository {
         total_centavos: resumo.total_centavos + venda.valor_total_centavos
       }),
       { quantidade: 0, total_centavos: 0 }
+    );
+  }
+
+  async cancelarVenda(vendaId: string, motivo?: string): Promise<Transacao> {
+    return this.db.transaction(
+      "rw",
+      this.db.catalogo,
+      this.db.transacoes,
+      async () => {
+        const venda = await this.db.transacoes.get(vendaId);
+        if (!venda || venda.tipo !== "VENDA") {
+          throw new Error("Venda não encontrada.");
+        }
+        const relacionados = await this.db.transacoes
+          .where("venda_id")
+          .equals(vendaId)
+          .toArray();
+        if (relacionados.some((item) => item.tipo === "CANCELAMENTO_VENDA")) {
+          throw new TypeError("Esta venda já foi cancelada.");
+        }
+        if (relacionados.some((item) => item.tipo === "PAGAMENTO_FIADO")) {
+          throw new TypeError(
+            "Não é possível cancelar um fiado que já possui pagamentos."
+          );
+        }
+
+        const quantidades = new Map<string, number>();
+        for (const item of venda.itens) {
+          if (!item.id_produto) continue;
+          quantidades.set(
+            item.id_produto,
+            (quantidades.get(item.id_produto) ?? 0) + item.quantidade
+          );
+        }
+        for (const [id, quantidade] of quantidades) {
+          const produto = await this.db.catalogo.get(id);
+          if (
+            produto &&
+            produto.tipo === "PRODUTO" &&
+            produto.estoque_quantidade !== null
+          ) {
+            await this.db.catalogo.update(id, {
+              estoque_quantidade: produto.estoque_quantidade + quantidade
+            });
+          }
+        }
+
+        const cancelamento: Transacao = {
+          id: crypto.randomUUID(),
+          data_hora: new Date().toISOString(),
+          tipo: "CANCELAMENTO_VENDA",
+          cliente_id: venda.cliente_id,
+          venda_id: venda.id,
+          data_vencimento: null,
+          valor_total_centavos: venda.valor_total_centavos,
+          status_pagamento: "CANCELADO",
+          metodo_pagamento: null,
+          descricao: normalizarDescricao(motivo) ?? "Venda cancelada",
+          itens: []
+        };
+        await this.db.transacoes.add(cancelamento);
+        return cancelamento;
+      }
+    );
+  }
+
+  async corrigirVendaFiada(
+    vendaId: string,
+    input: {
+      itens: ItemTransacao[];
+      cliente_id: string;
+      data_vencimento: string;
+      descricao?: string;
+    }
+  ): Promise<Transacao> {
+    return this.db.transaction(
+      "rw",
+      this.db.clientes,
+      this.db.catalogo,
+      this.db.transacoes,
+      this.db.configuracoes,
+      async () => {
+        await this.cancelarVenda(vendaId, "Fiado substituído por correção");
+        return this.registrarVendaFiada(input);
+      }
     );
   }
 }

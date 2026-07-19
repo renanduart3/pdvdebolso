@@ -31,6 +31,7 @@ function venda(input: {
     valor_total_centavos: input.quantidade * 500,
     status_pagamento: input.status,
     metodo_pagamento: input.status === "PAGO" ? input.metodo ?? "PIX" : null,
+    descricao: null,
     itens: [
       {
         id_produto: "produto-1",
@@ -58,6 +59,7 @@ function pagamento(input: {
     valor_total_centavos: input.valor,
     status_pagamento: "PAGO",
     metodo_pagamento: "DINHEIRO",
+    descricao: null,
     itens: []
   };
 }
@@ -139,5 +141,39 @@ describe("calcularIndicadoresBI", () => {
     expect(indicadores.produtos[0].quantidade).toBe(4);
     expect(indicadores.semana.melhor?.percentual).toBe(100);
     expect(indicadores.risco.divida_ativa_centavos).toBe(0);
+  });
+
+  it("remove vendas canceladas do caixa, risco e ranking", () => {
+    const agora = new Date(2026, 6, 18, 18, 0, 0);
+    const original = venda({
+      id: "venda-cancelada",
+      data: new Date(2026, 6, 18, 11, 0, 0),
+      quantidade: 2,
+      status: "PAGO",
+      metodo: "PIX"
+    });
+    const cancelamento: Transacao = {
+      id: "cancelamento",
+      data_hora: agora.toISOString(),
+      tipo: "CANCELAMENTO_VENDA",
+      cliente_id: null,
+      venda_id: original.id,
+      data_vencimento: null,
+      valor_total_centavos: original.valor_total_centavos,
+      status_pagamento: "CANCELADO",
+      metodo_pagamento: null,
+      descricao: "Venda cancelada",
+      itens: []
+    };
+
+    const indicadores = calcularIndicadoresBI(
+      [original, cancelamento],
+      catalogo,
+      agora
+    );
+
+    expect(indicadores.caixa.hoje_centavos).toBe(0);
+    expect(indicadores.produtos).toEqual([]);
+    expect(indicadores.risco.vendas_mes_centavos).toBe(0);
   });
 });

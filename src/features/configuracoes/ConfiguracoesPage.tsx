@@ -1,10 +1,29 @@
 import type { JSX } from "preact";
-import { useCallback, useEffect, useState } from "preact/hooks";
+import { useCallback, useEffect, useRef, useState } from "preact/hooks";
 
 import {
   backupRepository,
   configuracoesRepository
 } from "../../database/repositories";
+import {
+  aguardarConfirmacaoLicenca,
+  criarCheckoutLicenca,
+  pagamentoConfigurado,
+  restaurarLicenca
+} from "../../monetization/api";
+import type {
+  EstadoLicenca,
+  PlanoAplicacao
+} from "../../monetization/contracts";
+import {
+  ativarLicencaLocal,
+  limparCheckoutPendente,
+  registrarCheckoutPendente
+} from "../../monetization/licenseService";
+import {
+  temasAplicacao,
+  type TemaAplicacao
+} from "../../theme/registry";
 import styles from "../shared/Management.module.css";
 
 function mensagemErro(error: unknown): string {
@@ -12,22 +31,41 @@ function mensagemErro(error: unknown): string {
 }
 
 type ConfiguracoesPageProps = {
+  plano?: PlanoAplicacao;
+  estadoLicenca?: EstadoLicenca | null;
+  online?: boolean;
+  tema?: TemaAplicacao;
+  onTemaChange?: (tema: TemaAplicacao) => void;
+  onLicenseChange?: () => void;
   onBackupStatusChange?: (pendente: boolean) => void;
 };
 
 export function ConfiguracoesPage({
+  plano = "GRATUITO",
+  estadoLicenca = null,
+  online = true,
+  tema = "IMPACTO",
+  onTemaChange,
+  onLicenseChange,
   onBackupStatusChange
 }: ConfiguracoesPageProps) {
   const [chavePix, setChavePix] = useState("");
+  const [validarEstoque, setValidarEstoque] = useState(false);
+  const [temaSelecionado, setTemaSelecionado] = useState<TemaAplicacao>(tema);
   const [persistente, setPersistente] = useState<boolean | null>(null);
   const [ultimoBackup, setUltimoBackup] = useState<string | null>(null);
   const [backupPendente, setBackupPendente] = useState(false);
   const [arquivoImportacao, setArquivoImportacao] = useState<string | null>(null);
   const [nomeArquivo, setNomeArquivo] = useState("");
   const [confirmouSubstituicao, setConfirmouSubstituicao] = useState(false);
+  const [codigoRestauracao, setCodigoRestauracao] = useState("");
+  const [sessaoPendente, setSessaoPendente] = useState(
+    estadoLicenca?.pagamento_pendente?.sessao_id ?? ""
+  );
   const [processando, setProcessando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [sucesso, setSucesso] = useState<string | null>(null);
+  const retornoPagamentoProcessado = useRef(false);
 
   const carregarBackup = useCallback(async () => {
     const [ultimo, pendente] = await Promise.all([
@@ -42,6 +80,7 @@ export function ConfiguracoesPage({
   useEffect(() => {
     Promise.all([
       configuracoesRepository.obterChavePix().then(setChavePix),
+      configuracoesRepository.obterValidacaoEstoque().then(setValidarEstoque),
       carregarBackup()
     ]).catch((error: unknown) => setErro(mensagemErro(error)));
 
@@ -52,6 +91,42 @@ export function ConfiguracoesPage({
     }
   }, [carregarBackup]);
 
+  useEffect(() => {
+    setTemaSelecionado(tema);
+  }, [tema]);
+
+  useEffect(() => {
+    setSessaoPendente(estadoLicenca?.pagamento_pendente?.sessao_id ?? "");
+    if (estadoLicenca?.licenca?.token_restauracao) {
+      setCodigoRestauracao(estadoLicenca.licenca.token_restauracao);
+    }
+  }, [estadoLicenca]);
+
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const retorno = url.searchParams.get("pagamento");
+    if (retornoPagamentoProcessado.current || !retorno) return;
+    if (retorno === "falha") {
+      retornoPagamentoProcessado.current = true;
+      url.searchParams.delete("pagamento");
+      window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+      void limparCheckoutPendente();
+      setSessaoPendente("");
+      setErro("O pagamento não foi concluído.");
+      return;
+    }
+    if (
+      !sessaoPendente ||
+      (retorno !== "sucesso" && retorno !== "pendente")
+    ) {
+      return;
+    }
+    retornoPagamentoProcessado.current = true;
+    url.searchParams.delete("pagamento");
+    window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+    void verificarPagamento();
+  }, [sessaoPendente]);
+
   async function salvarPix(event: JSX.TargetedSubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     setProcessando(true);
@@ -61,6 +136,41 @@ export function ConfiguracoesPage({
       await configuracoesRepository.salvarChavePix(chavePix);
       setChavePix(chavePix.trim());
       setSucesso("Configuração de cobrança salva neste dispositivo.");
+    } catch (error: unknown) {
+      setErro(mensagemErro(error));
+    } finally {
+      setProcessando(false);
+    }
+  }
+
+  async function salvarEstoque(event: JSX.TargetedSubmitEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setProcessando(true);
+    setErro(null);
+    setSucesso(null);
+    try {
+      await configuracoesRepository.salvarValidacaoEstoque(validarEstoque);
+      setSucesso(
+        validarEstoque
+          ? "Vendas serão bloqueadas quando o estoque for insuficiente."
+          : "Vendas poderão deixar o estoque negativo."
+      );
+    } catch (error: unknown) {
+      setErro(mensagemErro(error));
+    } finally {
+      setProcessando(false);
+    }
+  }
+
+  async function salvarTema(event: JSX.TargetedSubmitEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setProcessando(true);
+    setErro(null);
+    setSucesso(null);
+    try {
+      await configuracoesRepository.salvarTema(temaSelecionado);
+      onTemaChange?.(temaSelecionado);
+      setSucesso(`Tema ${temaSelecionado.toLowerCase()} aplicado neste dispositivo.`);
     } catch (error: unknown) {
       setErro(mensagemErro(error));
     } finally {
@@ -160,6 +270,83 @@ export function ConfiguracoesPage({
     }
   }
 
+  async function ativarLicencaRecebida(
+    licenca: NonNullable<EstadoLicenca["licenca"]>
+  ) {
+    await ativarLicencaLocal(licenca);
+    setSessaoPendente("");
+    setCodigoRestauracao(licenca.token_restauracao);
+    setSucesso("Licença sem anúncios ativada neste dispositivo.");
+    onLicenseChange?.();
+  }
+
+  async function iniciarPagamento() {
+    setProcessando(true);
+    setErro(null);
+    setSucesso(null);
+    try {
+      if (!online) throw new Error("Conecte-se à internet para iniciar o pagamento.");
+      const checkout = await criarCheckoutLicenca(crypto.randomUUID());
+      await registrarCheckoutPendente(checkout);
+      setSessaoPendente(checkout.sessao_id);
+      window.location.assign(checkout.checkout_url);
+    } catch (error: unknown) {
+      setErro(mensagemErro(error));
+      setProcessando(false);
+    }
+  }
+
+  async function verificarPagamento() {
+    if (!sessaoPendente) return;
+    setProcessando(true);
+    setErro(null);
+    setSucesso(null);
+    try {
+      if (!online) throw new Error("Conecte-se à internet para verificar o pagamento.");
+      const resultado = await aguardarConfirmacaoLicenca(sessaoPendente);
+      if (resultado.status === "APROVADA") {
+        await ativarLicencaRecebida(resultado.licenca);
+      } else if (resultado.status === "RECUSADA") {
+        await limparCheckoutPendente();
+        setSessaoPendente("");
+        setErro("O pagamento foi recusado ou cancelado.");
+      } else {
+        setSucesso("Pagamento ainda pendente. Você pode verificar novamente.");
+      }
+    } catch (error: unknown) {
+      setErro(mensagemErro(error));
+    } finally {
+      setProcessando(false);
+    }
+  }
+
+  async function enviarRestauracao(
+    event: JSX.TargetedSubmitEvent<HTMLFormElement>
+  ) {
+    event.preventDefault();
+    setProcessando(true);
+    setErro(null);
+    setSucesso(null);
+    try {
+      if (!online) throw new Error("Conecte-se à internet para restaurar a licença.");
+      const licenca = await restaurarLicenca(codigoRestauracao);
+      await ativarLicencaRecebida(licenca);
+    } catch (error: unknown) {
+      setErro(mensagemErro(error));
+    } finally {
+      setProcessando(false);
+    }
+  }
+
+  async function copiarCodigoLicenca() {
+    try {
+      await navigator.clipboard.writeText(codigoRestauracao);
+      setSucesso("Código de restauração copiado.");
+    } catch {
+      setErro("Não foi possível copiar. Selecione o código manualmente.");
+    }
+  }
+
   return (
     <main class={styles.main}>
       <section class={styles.hero}>
@@ -230,13 +417,80 @@ export function ConfiguracoesPage({
           )}
         </section>
 
+        <form class={styles.panel} onSubmit={salvarEstoque}>
+          <div class={styles.panelTitle}>
+            <span>03</span>
+            <h2>ESTOQUE NA VENDA</h2>
+          </div>
+          <p>
+            Com a validação ligada, o PDV impede vender mais unidades do que a
+            quantidade cadastrada.
+          </p>
+          <label class={styles.checkLabel}>
+            <input
+              type="checkbox"
+              checked={validarEstoque}
+              onChange={(event) =>
+                setValidarEstoque(event.currentTarget.checked)
+              }
+            />
+            VALIDAR ESTOQUE ANTES DE FINALIZAR
+          </label>
+          <button class={styles.button} type="submit" disabled={processando}>
+            SALVAR REGRA DE ESTOQUE
+          </button>
+        </form>
+
+        <form class={styles.panel} onSubmit={salvarTema}>
+          <div class={styles.panelTitle}>
+            <span>04</span>
+            <h2>APARÊNCIA</h2>
+          </div>
+          <p>
+            Escolha o estilo visual mais confortável. A preferência fica salva
+            neste dispositivo e também entra no backup.
+          </p>
+          <div class={styles.themeGrid}>
+            {temasAplicacao.map((opcao) => (
+              <label
+                key={opcao.id}
+                class={
+                  temaSelecionado === opcao.id
+                    ? styles.themeOptionSelected
+                    : styles.themeOption
+                }
+              >
+                <input
+                  type="radio"
+                  name="tema-aplicacao"
+                  value={opcao.id}
+                  checked={temaSelecionado === opcao.id}
+                  onChange={() => setTemaSelecionado(opcao.id)}
+                />
+                <span>
+                  <strong>{opcao.nome}</strong>
+                  <small>{opcao.descricao}</small>
+                </span>
+                <i class={styles.themeSwatches} aria-hidden="true">
+                  <span />
+                  <span />
+                  <span />
+                </i>
+              </label>
+            ))}
+          </div>
+          <button class={styles.button} type="submit" disabled={processando}>
+            APLICAR TEMA
+          </button>
+        </form>
+
         <section
           class={`${styles.panel} ${styles.widePanel} ${
             backupPendente ? styles.dangerPanel : ""
           }`}
         >
           <div class={styles.panelTitle}>
-            <span>03</span>
+            <span>05</span>
             <h2>BACKUP E RESTAURAÇÃO</h2>
           </div>
           <p>
@@ -306,6 +560,105 @@ export function ConfiguracoesPage({
               IMPORTAR E SUBSTITUIR
             </button>
           </div>
+        </section>
+
+        <section class={styles.panel}>
+          <div class={styles.panelTitle}>
+            <span>06</span>
+            <h2>PLANO DA APLICAÇÃO</h2>
+          </div>
+          <p>
+            A versão gratuita pode exibir publicidade somente quando houver
+            internet. Nenhum dado comercial é enviado ao provedor de anúncios.
+          </p>
+          <span class={styles.tag}>
+            {(estadoLicenca?.plano ?? plano) === "SEM_ANUNCIOS"
+              ? "LICENÇA SEM ANÚNCIOS ATIVA"
+              : "VERSÃO GRATUITA COM ANÚNCIOS"}
+          </span>
+          {(estadoLicenca?.plano ?? plano) === "SEM_ANUNCIOS" ? (
+            <div class={styles.licenseArea}>
+              <p>
+                Guarde este código junto do backup para restaurar a licença em
+                outro dispositivo.
+              </p>
+              <label htmlFor="license-code-active">
+                CÓDIGO DE RESTAURAÇÃO
+                <textarea
+                  id="license-code-active"
+                  value={codigoRestauracao}
+                  readOnly
+                  rows={3}
+                />
+              </label>
+              <button
+                class={styles.secondaryButton}
+                type="button"
+                onClick={copiarCodigoLicenca}
+              >
+                COPIAR CÓDIGO
+              </button>
+            </div>
+          ) : (
+            <>
+              <p>
+                Remova os anúncios permanentemente com um pagamento único
+                simbólico de R$ 5,00 pelo Mercado Pago.
+              </p>
+              {!pagamentoConfigurado() && (
+                <span class={styles.tag}>PAGAMENTO AINDA NÃO CONFIGURADO</span>
+              )}
+              {!online && (
+                <span class={styles.tag}>CONEXÃO NECESSÁRIA PARA PAGAR OU RESTAURAR</span>
+              )}
+              {sessaoPendente ? (
+                <button
+                  class={styles.button}
+                  type="button"
+                  onClick={() => void verificarPagamento()}
+                  disabled={processando || !online || !pagamentoConfigurado()}
+                >
+                  {processando ? "VERIFICANDO..." : "VERIFICAR PAGAMENTO"}
+                </button>
+              ) : (
+                <button
+                  class={styles.button}
+                  type="button"
+                  onClick={iniciarPagamento}
+                  disabled={processando || !online || !pagamentoConfigurado()}
+                >
+                  REMOVER ANÚNCIOS POR R$ 5,00
+                </button>
+              )}
+              <form class={styles.licenseArea} onSubmit={enviarRestauracao}>
+                <h3>JÁ PAGOU EM OUTRO DISPOSITIVO?</h3>
+                <label htmlFor="license-restore-code">
+                  CÓDIGO DE RESTAURAÇÃO
+                  <textarea
+                    id="license-restore-code"
+                    value={codigoRestauracao}
+                    onInput={(event) =>
+                      setCodigoRestauracao(event.currentTarget.value)
+                    }
+                    rows={3}
+                    required
+                  />
+                </label>
+                <button
+                  class={styles.secondaryButton}
+                  type="submit"
+                  disabled={
+                    processando ||
+                    !online ||
+                    !pagamentoConfigurado() ||
+                    codigoRestauracao.trim().length < 16
+                  }
+                >
+                  RESTAURAR LICENÇA
+                </button>
+              </form>
+            </>
+          )}
         </section>
       </div>
     </main>

@@ -10,10 +10,151 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 82px;
-  padding: var(--space-3) var(--space-5);
+  min-height: 72px;
+  padding: 9px 18px;
   border-bottom: var(--border-heavy);
   background: var(--color-white);
+}
+
+.headerStats {
+  display: flex;
+  min-width: 0;
+  margin-inline: auto;
+  align-items: stretch;
+  border: var(--border);
+  background: var(--color-paper);
+}
+
+.headerStats > span {
+  display: grid;
+  min-width: 92px;
+  padding: 5px 8px;
+  align-content: center;
+  border-right: 2px solid var(--color-black);
+}
+
+.headerStats > span:last-child {
+  border-right: 0;
+}
+
+.headerStats small,
+.headerStats strong {
+  overflow: hidden;
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.headerStats strong {
+  font-size: 0.68rem;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.headerIconButton {
+  position: relative;
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border: var(--border);
+  background: var(--color-white);
+  box-shadow: var(--shadow-small);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.notificationDot {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 13px;
+  height: 13px;
+  border: 2px solid var(--color-black);
+  background: var(--color-pink);
+}
+
+.notificationsPanel {
+  position: absolute;
+  z-index: 60;
+  top: calc(100% + 8px);
+  right: 14px;
+  display: grid;
+  width: min(390px, calc(100vw - 28px));
+  padding: 12px;
+  gap: 10px;
+  border: var(--border-heavy);
+  background: var(--color-white);
+  box-shadow: var(--shadow);
+}
+
+.notificationsPanel > div:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: var(--border);
+}
+
+.notificationsPanel > div:first-child > strong {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+}
+
+.notificationsPanel > div:first-child button {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  background: transparent;
+  font-size: 1.25rem;
+  font-weight: 900;
+}
+
+.notificationStats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.notificationStats span {
+  display: flex;
+  padding: 6px;
+  justify-content: space-between;
+  border: 2px solid var(--color-black);
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 900;
+}
+
+.notificationItem,
+.notificationEmpty {
+  display: grid;
+  width: 100%;
+  padding: 10px;
+  gap: 3px;
+  border: var(--border);
+  background: var(--color-pink);
+  color: var(--color-black);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 900;
+  text-align: left;
+}
+
+button.notificationItem {
+  box-shadow: var(--shadow-small);
+  cursor: pointer;
+}
+
+.notificationEmpty {
+  background: var(--color-green);
 }
 
 .brand {
@@ -26,14 +167,14 @@
 
 .brandMark {
   display: grid;
-  width: 48px;
-  height: 48px;
+  width: 42px;
+  height: 42px;
   place-items: center;
   border: var(--border-heavy);
   background: var(--color-green);
   box-shadow: var(--shadow-small);
   font-family: var(--font-display);
-  font-size: 1.7rem;
+  font-size: 1.45rem;
   line-height: 1;
 }
 
@@ -107,15 +248,15 @@
 
 .workspace {
   display: grid;
-  min-height: calc(100vh - 82px);
-  grid-template-columns: 270px minmax(0, 1fr);
+  min-height: calc(100vh - 72px);
+  grid-template-columns: 230px minmax(0, 1fr);
 }
 
 .sidebar {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-  padding: var(--space-5) var(--space-4);
+  padding: 18px 14px;
   border-right: var(--border-heavy);
   background: var(--color-black);
   color: var(--color-white);
@@ -133,14 +274,15 @@
 
 .navButton {
   display: grid;
-  min-height: 58px;
+  min-height: 50px;
   padding: 0;
-  grid-template-columns: 50px 1fr;
+  grid-template-columns: 42px 1fr;
   align-items: center;
   border: var(--border);
-  box-shadow: 5px 5px 0 var(--color-white);
+  border-radius: var(--radius-small);
+  box-shadow: var(--shadow-on-dark);
   color: var(--color-black);
-  font: 900 0.95rem/1 var(--font-body);
+  font: 900 0.82rem/1 var(--font-body);
   text-align: left;
   text-transform: uppercase;
   cursor: pointer;
@@ -152,7 +294,7 @@
 }
 
 .navButton[aria-current="page"] {
-  box-shadow: 2px 2px 0 var(--color-white);
+  box-shadow: var(--shadow-on-dark-active);
   transform: translate(3px, 3px);
 }
 
@@ -160,7 +302,6 @@
   display: grid;
   height: 100%;
   place-items: center;
-  border-right: var(--border);
   font-family: var(--font-mono);
 }
 
@@ -223,7 +364,7 @@
   max-width: 900px;
   margin: var(--space-3) 0 var(--space-2);
   font-family: var(--font-display);
-  font-size: clamp(2.8rem, 9vw, 7.5rem);
+  font-size: clamp(2.25rem, 7.2vw, 6rem);
   line-height: 0.85;
   letter-spacing: -0.07em;
 }
@@ -268,7 +409,7 @@
 
 .metricCard strong {
   font-family: var(--font-display);
-  font-size: clamp(2rem, 6vw, 4.6rem);
+  font-size: clamp(1.6rem, 4.8vw, 3.7rem);
   letter-spacing: -0.05em;
 }
 
@@ -293,7 +434,7 @@
 }
 
 .actionCopy h2 {
-  font-size: clamp(2rem, 5vw, 4rem);
+  font-size: clamp(1.6rem, 4vw, 3.2rem);
 }
 
 .actionCopy p {
@@ -346,7 +487,7 @@
 
 .sectionTitle h2 {
   margin: 0;
-  font-size: clamp(1.8rem, 4vw, 3.2rem);
+  font-size: clamp(1.45rem, 3.2vw, 2.55rem);
 }
 
 .checkList {
@@ -387,7 +528,7 @@
 @media (hover: hover) {
   .navButton:not(:disabled):hover,
   .primaryButton:not(:disabled):hover {
-    box-shadow: 3px 3px 0 var(--color-white);
+    box-shadow: var(--shadow-on-dark-active);
     transform: translate(2px, 2px);
   }
 }
@@ -403,7 +544,15 @@
   }
 
   .connectionBadge {
-    font-size: 0.64rem;
+    display: none;
+  }
+
+  .headerStats {
+    display: none;
+  }
+
+  .headerActions {
+    margin-left: auto;
   }
 
   .workspace {
@@ -476,15 +625,10 @@
     place-items: center;
     gap: 4px;
     border: 0;
-    border-right: var(--border);
     background: var(--color-white);
     color: var(--color-black);
     font: 900 0.58rem/1 var(--font-mono);
     text-transform: uppercase;
-  }
-
-  .mobileNav button:last-child {
-    border-right: 0;
   }
 
   .mobileNav button:disabled {
@@ -509,7 +653,7 @@
   }
 
   .hero h1 {
-    font-size: clamp(3.3rem, 18vw, 5rem);
+    font-size: clamp(2.65rem, 14.4vw, 4rem);
   }
 }
 

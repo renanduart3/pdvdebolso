@@ -8,14 +8,14 @@ import type {
 } from "../types";
 
 const FORMATO = "pdv-de-bolso";
-const VERSAO_BACKUP = 1;
+const VERSAO_BACKUP = 2;
 const ULTIMO_BACKUP_KEY = "ultimo_backup_em";
 const QUINZE_DIAS_MS = 14 * 24 * 60 * 60 * 1000;
 
 export type BackupPdv = {
   formato: typeof FORMATO;
   versao: typeof VERSAO_BACKUP;
-  schema_banco: 2;
+  schema_banco: 3;
   exportado_em: string;
   dados: {
     clientes: Cliente[];
@@ -51,8 +51,11 @@ function validarCliente(value: unknown): value is Cliente {
     textoNaoVazio(value.id) &&
     textoNaoVazio(value.nome) &&
     (value.telefone === null || texto(value.telefone)) &&
+    typeof value.telefone_whatsapp === "boolean" &&
+    (value.email === null || texto(value.email)) &&
     (value.anotacoes === null || texto(value.anotacoes)) &&
-    dataIso(value.data_cadastro)
+    dataIso(value.data_cadastro) &&
+    typeof value.ativo === "boolean"
   );
 }
 
@@ -69,17 +72,13 @@ function validarCatalogo(value: unknown): value is ProdutoCatalogo {
   }
 
   if (value.tipo === "SERVICO") return value.estoque_quantidade === null;
-  return (
-    value.estoque_quantidade === null ||
-    (Number.isSafeInteger(value.estoque_quantidade) &&
-      Number(value.estoque_quantidade) >= 0)
-  );
+  return Number.isSafeInteger(value.estoque_quantidade);
 }
 
 function validarItem(value: unknown): value is ItemTransacao {
   return (
     objeto(value) &&
-    textoNaoVazio(value.id_produto) &&
+    (value.id_produto === null || textoNaoVazio(value.id_produto)) &&
     textoNaoVazio(value.nome_produto) &&
     Number.isSafeInteger(value.quantidade) &&
     Number(value.quantidade) > 0 &&
@@ -92,17 +91,22 @@ function validarTransacao(value: unknown): value is Transacao {
     !objeto(value) ||
     !textoNaoVazio(value.id) ||
     !dataIso(value.data_hora) ||
-    (value.tipo !== "VENDA" && value.tipo !== "PAGAMENTO_FIADO") ||
+    !["VENDA", "PAGAMENTO_FIADO", "CANCELAMENTO_VENDA"].includes(
+      String(value.tipo)
+    ) ||
     (value.cliente_id !== null && !textoNaoVazio(value.cliente_id)) ||
     (value.venda_id !== null && !textoNaoVazio(value.venda_id)) ||
     (value.data_vencimento !== null &&
       !/^\d{4}-\d{2}-\d{2}$/.test(String(value.data_vencimento))) ||
     !centavos(value.valor_total_centavos) ||
-    !["PAGO", "FIADO", "PARCIAL"].includes(String(value.status_pagamento)) ||
+    !["PAGO", "FIADO", "PARCIAL", "CANCELADO"].includes(
+      String(value.status_pagamento)
+    ) ||
     !(
       value.metodo_pagamento === null ||
       ["PIX", "DINHEIRO", "CARTAO"].includes(String(value.metodo_pagamento))
     ) ||
+    (value.descricao !== null && !texto(value.descricao)) ||
     !Array.isArray(value.itens) ||
     !value.itens.every(validarItem)
   ) {
@@ -116,6 +120,16 @@ function validarTransacao(value: unknown): value is Transacao {
       value.data_vencimento === null &&
       value.status_pagamento === "PAGO" &&
       value.metodo_pagamento !== null &&
+      value.itens.length === 0
+    );
+  }
+
+  if (value.tipo === "CANCELAMENTO_VENDA") {
+    return (
+      textoNaoVazio(value.venda_id) &&
+      value.data_vencimento === null &&
+      value.status_pagamento === "CANCELADO" &&
+      value.metodo_pagamento === null &&
       value.itens.length === 0
     );
   }
@@ -139,10 +153,73 @@ function idsUnicos(itens: Array<{ id: string }>): boolean {
 
 export function validarBackup(value: unknown): BackupPdv {
   if (
+    objeto(value) &&
+    value.formato === FORMATO &&
+    value.versao === 1 &&
+    value.schema_banco === 2 &&
+    dataIso(value.exportado_em) &&
+    objeto(value.dados)
+  ) {
+    const dadosAntigos = value.dados;
+    if (
+      Array.isArray(dadosAntigos.clientes) &&
+      Array.isArray(dadosAntigos.catalogo) &&
+      Array.isArray(dadosAntigos.transacoes) &&
+      Array.isArray(dadosAntigos.configuracoes)
+    ) {
+      value = {
+        formato: FORMATO,
+        versao: VERSAO_BACKUP,
+        schema_banco: 3,
+        exportado_em: value.exportado_em,
+        dados: {
+          clientes: dadosAntigos.clientes.map((cliente) =>
+            objeto(cliente)
+              ? {
+                  ...cliente,
+                  telefone_whatsapp:
+                    typeof cliente.telefone === "string" &&
+                    cliente.telefone.length > 0,
+                  email: null,
+                  ativo: true
+                }
+              : cliente
+          ),
+          catalogo: dadosAntigos.catalogo.map((item) =>
+            objeto(item)
+              ? {
+                  ...item,
+                  estoque_quantidade:
+                    item.tipo === "SERVICO"
+                      ? null
+                      : Number.isSafeInteger(item.estoque_quantidade)
+                        ? item.estoque_quantidade
+                        : 0
+                }
+              : item
+          ),
+          transacoes: dadosAntigos.transacoes.map((transacao) =>
+            objeto(transacao) ? { ...transacao, descricao: null } : transacao
+          ),
+          configuracoes: [
+            ...dadosAntigos.configuracoes,
+            ...(dadosAntigos.configuracoes.some(
+              (item) =>
+                objeto(item) && item.chave === "validar_estoque_venda"
+            )
+              ? []
+              : [{ chave: "validar_estoque_venda", valor: false }])
+          ]
+        }
+      };
+    }
+  }
+
+  if (
     !objeto(value) ||
     value.formato !== FORMATO ||
     value.versao !== VERSAO_BACKUP ||
-    value.schema_banco !== 2 ||
+    value.schema_banco !== 3 ||
     !dataIso(value.exportado_em) ||
     !objeto(value.dados)
   ) {
@@ -184,13 +261,14 @@ export function validarBackup(value: unknown): BackupPdv {
       throw new TypeError("O backup referencia um cliente inexistente.");
     }
     if (
-      transacao.tipo === "PAGAMENTO_FIADO" &&
+      (transacao.tipo === "PAGAMENTO_FIADO" ||
+        transacao.tipo === "CANCELAMENTO_VENDA") &&
       (!transacao.venda_id || !vendasIds.has(transacao.venda_id))
     ) {
       throw new TypeError("O backup referencia uma venda fiada inexistente.");
     }
     for (const item of transacao.itens) {
-      if (!catalogoIds.has(item.id_produto)) {
+      if (item.id_produto && !catalogoIds.has(item.id_produto)) {
         throw new TypeError("O backup referencia um item de catálogo inexistente.");
       }
     }
@@ -231,7 +309,7 @@ export class BackupRepository {
     const backup: BackupPdv = {
       formato: FORMATO,
       versao: VERSAO_BACKUP,
-      schema_banco: 2,
+      schema_banco: 3,
       exportado_em: exportadoEm,
       dados
     };

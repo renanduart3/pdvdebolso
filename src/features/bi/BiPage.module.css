@@ -1,12 +1,43 @@
 .main {
   width: min(100%, 1320px);
   margin-inline: auto;
-  padding: clamp(24px, 4vw, 52px);
+  padding: clamp(18px, 2.5vw, 34px);
 }
 
 .hero {
-  padding-bottom: 28px;
+  padding-bottom: 16px;
   border-bottom: var(--border-heavy);
+}
+
+.heroTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.exportButton {
+  min-height: 40px;
+  padding: 7px 12px;
+  border: var(--border);
+  background: var(--color-green);
+  box-shadow: var(--shadow-small);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.exportStatus {
+  display: block;
+  width: fit-content;
+  margin-top: 10px;
+  padding: 5px 8px;
+  border: 2px solid var(--color-black);
+  background: var(--color-green);
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 900;
 }
 
 .eyebrow,
@@ -24,8 +55,8 @@
   max-width: 1050px;
   margin: 14px 0 8px;
   font-family: var(--font-display);
-  font-size: clamp(3rem, 7vw, 6.5rem);
-  line-height: 0.86;
+  font-size: clamp(1.85rem, 3.6vw, 3.75rem);
+  line-height: 0.9;
   letter-spacing: -0.07em;
 }
 
@@ -104,7 +135,7 @@
 .sectionHeading h2 {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(1.35rem, 3vw, 2.3rem);
+  font-size: clamp(1.1rem, 2.4vw, 1.85rem);
   line-height: 1;
 }
 
@@ -140,7 +171,7 @@
 
 .metricCard strong {
   font-family: var(--font-display);
-  font-size: clamp(1.7rem, 2.4vw, 2.4rem);
+  font-size: clamp(1.35rem, 1.9vw, 1.95rem);
   line-height: 0.95;
   letter-spacing: -0.05em;
   white-space: nowrap;
@@ -382,7 +413,7 @@
 
 .riskContent > strong {
   font-family: var(--font-display);
-  font-size: clamp(4rem, 10vw, 8rem);
+  font-size: clamp(3.2rem, 8vw, 6.4rem);
   line-height: 0.8;
   letter-spacing: -0.08em;
 }
@@ -390,7 +421,7 @@
 .riskContent p {
   max-width: 650px;
   margin: 0;
-  font-size: clamp(1rem, 2vw, 1.35rem);
+  font-size: clamp(0.85rem, 1.6vw, 1.1rem);
   font-weight: 900;
 }
 
@@ -425,8 +456,13 @@
 }
 
 @media (max-width: 560px) {
+  .heroTop {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
   .hero h1 {
-    font-size: 2.5rem;
+    font-size: 2rem;
     letter-spacing: -0.055em;
   }
 

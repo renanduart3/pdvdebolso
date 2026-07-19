@@ -48,6 +48,46 @@ export class PdvDeBolsoDatabase extends Dexie {
             }
           });
       });
+
+    this.version(3)
+      .stores({
+        clientes: "id, nome, telefone, data_cadastro, ativo",
+        catalogo: "id, nome, ativo, tipo",
+        transacoes:
+          "id, data_hora, tipo, cliente_id, venda_id, status_pagamento, [cliente_id+data_hora], [tipo+data_hora]",
+        configuracoes: "chave"
+      })
+      .upgrade(async (transaction) => {
+        await transaction
+          .table("clientes")
+          .toCollection()
+          .modify((cliente: Record<string, unknown>) => {
+            cliente.telefone_whatsapp =
+              typeof cliente.telefone === "string" && cliente.telefone.length > 0;
+            cliente.email = null;
+            cliente.ativo = true;
+          });
+        await transaction
+          .table("catalogo")
+          .toCollection()
+          .modify((item: Record<string, unknown>) => {
+            if (item.tipo === "SERVICO") {
+              item.estoque_quantidade = null;
+            } else if (!Number.isSafeInteger(item.estoque_quantidade)) {
+              item.estoque_quantidade = 0;
+            }
+          });
+        await transaction
+          .table("transacoes")
+          .toCollection()
+          .modify((transacao: Record<string, unknown>) => {
+            transacao.descricao = null;
+          });
+        await transaction.table("configuracoes").put({
+          chave: "validar_estoque_venda",
+          valor: false
+        });
+      });
   }
 }
 

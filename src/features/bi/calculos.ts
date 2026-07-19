@@ -90,6 +90,7 @@ export function calcularIndicadoresBI(
   ultimos7Dias.setDate(ultimos7Dias.getDate() - 7);
 
   const pagamentosPorVenda = new Map<string, number>();
+  const vendasCanceladas = new Set<string>();
   for (const transacao of transacoes) {
     if (transacao.tipo === "PAGAMENTO_FIADO" && transacao.venda_id) {
       pagamentosPorVenda.set(
@@ -98,9 +99,15 @@ export function calcularIndicadoresBI(
           transacao.valor_total_centavos
       );
     }
+    if (transacao.tipo === "CANCELAMENTO_VENDA" && transacao.venda_id) {
+      vendasCanceladas.add(transacao.venda_id);
+    }
   }
 
-  const vendas = transacoes.filter((transacao) => transacao.tipo === "VENDA");
+  const vendas = transacoes.filter(
+    (transacao) =>
+      transacao.tipo === "VENDA" && !vendasCanceladas.has(transacao.id)
+  );
   const vendasQuitadas = vendas.filter(
     (venda) =>
       venda.status_pagamento === "PAGO" ||
@@ -109,7 +116,16 @@ export function calcularIndicadoresBI(
   const recebimentos = transacoes.filter(
     (transacao) =>
       transacao.status_pagamento === "PAGO" &&
-      transacao.metodo_pagamento !== null
+      transacao.metodo_pagamento !== null &&
+      !(
+        transacao.tipo === "VENDA" &&
+        vendasCanceladas.has(transacao.id)
+      ) &&
+      !(
+        transacao.tipo === "PAGAMENTO_FIADO" &&
+        transacao.venda_id &&
+        vendasCanceladas.has(transacao.venda_id)
+      )
   );
 
   const recebimentosHoje = recebimentos.filter(
@@ -197,6 +213,7 @@ export function calcularIndicadoresBI(
   >();
   for (const venda of vendasQuitadas) {
     for (const item of venda.itens) {
+      if (!item.id_produto) continue;
       const atual = produtosMap.get(item.id_produto) ?? {
         id_produto: item.id_produto,
         nome: item.nome_produto,
@@ -222,6 +239,7 @@ export function calcularIndicadoresBI(
     const data = new Date(venda.data_hora);
     if (data < ultimos7Dias || data > agora) continue;
     for (const item of venda.itens) {
+      if (!item.id_produto) continue;
       saidas7Dias.set(
         item.id_produto,
         (saidas7Dias.get(item.id_produto) ?? 0) + item.quantidade

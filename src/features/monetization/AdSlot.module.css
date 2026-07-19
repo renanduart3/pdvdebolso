@@ -1,0 +1,18 @@
+.slot {
+  min-height: 88px;
+  padding: 8px;
+  border: 3px solid var(--color-white);
+  background: var(--color-white);
+  color: var(--color-black);
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 900;
+}
+
+.slot::before {
+  display: block;
+  margin-bottom: 5px;
+  content: "PUBLICIDADE";
+  font-size: 0.52rem;
+  letter-spacing: 0.08em;
+}
