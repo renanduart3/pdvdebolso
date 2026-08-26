@@ -16,6 +16,7 @@ import type {
   ProdutoCatalogo
 } from "../../database/types";
 import { filtrarDecimal } from "../shared/numericInput";
+import { EditIcon, PaymentIcon, TrashIcon, WhatsAppIcon } from "../shared/icons";
 import { criarLinkCobrancaWhatsApp } from "./whatsapp";
 import styles from "./FiadoPage.module.css";
 
@@ -398,37 +399,86 @@ export function FiadoPage({ onDataChange }: FiadoPageProps) {
       <section class={styles.accountsSection} aria-labelledby="accounts-title">
         <div class={styles.accountsHeader}><div><span class={styles.step}>02</span><h2 id="accounts-title">QUEM ESTÁ DEVENDO</h2></div><span class={styles.orderTag}>ATRASO → VALOR</span></div>
         {carregando ? <div class={styles.emptyState} role="status"><strong>CALCULANDO OS SALDOS...</strong></div> : contas.length === 0 ? <div class={styles.emptyState}><strong>NENHUMA CONTA PENDENTE.</strong><span>Use o formulário acima para registrar um fiado.</span></div> : (
-          <ul class={styles.accountsList}>
-            {contas.map((conta) => {
-              const linkWhatsApp = conta.cliente.telefone && conta.cliente.telefone_whatsapp
-                ? criarLinkCobrancaWhatsApp({ telefone: conta.cliente.telefone, nomeCliente: conta.cliente.nome, saldoCentavos: conta.saldo_centavos, chavePix })
-                : null;
-              return (
-                <li key={conta.venda.id} class={styles.accountCard}>
-                  <div class={styles.accountTop}><div><span class={`${styles.statusTag} ${conta.status_atual === "PARCIAL" ? styles.partialTag : styles.fiadoTag}`}>{conta.status_atual}</span><h3>{conta.cliente.nome}</h3><p>{conta.venda.descricao || conta.venda.itens.map((item) => item.nome_produto).join(", ")}</p><p>VENCE EM {formatarData(conta.venda.data_vencimento)}{conta.dias_atraso > 0 ? ` • ${conta.dias_atraso} DIAS DE ATRASO` : " • EM DIA"}</p></div><div class={styles.balance}><span>SALDO</span><strong>{formatarCentavos(conta.saldo_centavos)}</strong>{conta.valor_pago_centavos > 0 && <small>PAGO: {formatarCentavos(conta.valor_pago_centavos)}</small>}</div></div>
-                  <div class={styles.accountActions}>
-                    {linkWhatsApp ? <a href={linkWhatsApp} target="_blank" rel="noopener noreferrer">COBRAR VIA WHATSAPP ↗</a> : <span class={styles.noPhone}>SEM WHATSAPP</span>}
-                    <button type="button" onClick={() => abrirPagamento(conta)}>{vendaEmPagamento === conta.venda.id ? "CANCELAR BAIXA" : "REGISTRAR PAGAMENTO"}</button>
-                    <button type="button" onClick={() => editarFiado(conta)} disabled={conta.valor_pago_centavos > 0}>EDITAR FIADO</button>
-                    <button class={styles.deleteDebt} type="button" onClick={() => setVendaEmExclusao(conta)}>EXCLUIR FIADO</button>
-                  </div>
-                  {vendaEmPagamento === conta.venda.id && (
-                    <form class={styles.paymentForm} onSubmit={(event) => registrarPagamento(event, conta)}>
-                      <label>VALOR RECEBIDO<div class={styles.moneyInput}><span>R$</span><input value={valorPagamento} onInput={(event) => setValorPagamento(filtrarDecimal(event.currentTarget.value))} inputMode="decimal" required autoFocus /></div></label>
-                      <label>RECEBIDO POR<select value={metodoPagamento} onChange={(event) => setMetodoPagamento(event.currentTarget.value as MetodoPagamento)}><option value="PIX">PIX</option><option value="DINHEIRO">DINHEIRO</option><option value="CARTAO">CARTÃO</option></select></label>
-                      <button type="submit" disabled={processando}>{processando ? "REGISTRANDO..." : "CONFIRMAR BAIXA"}</button>
-                    </form>
-                  )}
-                  {vendaEmExclusao?.venda.id === conta.venda.id && (
-                    <div class={styles.confirmDelete} role="alertdialog" aria-label={`Confirmar exclusão do fiado de ${conta.cliente.nome}`}>
-                      <strong>EXCLUIR ESTE FIADO?</strong><span>O lançamento será cancelado, o estoque restaurado e o histórico mantido para auditoria.</span>
-                      <div><button type="button" onClick={() => setVendaEmExclusao(null)}>VOLTAR</button><button type="button" onClick={() => excluirFiado(conta)} disabled={processando}>CONFIRMAR EXCLUSÃO</button></div>
-                    </div>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
+          <div class={styles.tableWrapper}>
+            <table class={styles.dataTable}>
+              <thead>
+                <tr>
+                  <th>STATUS</th>
+                  <th>CLIENTE</th>
+                  <th>DESCRIÇÃO / VENCIMENTO</th>
+                  <th>SALDO PENDENTE</th>
+                  <th class={styles.actionCol}>AÇÕES</th>
+                </tr>
+              </thead>
+              <tbody>
+                {contas.map((conta) => {
+                  const linkWhatsApp = conta.cliente.telefone && conta.cliente.telefone_whatsapp
+                    ? criarLinkCobrancaWhatsApp({ telefone: conta.cliente.telefone, nomeCliente: conta.cliente.nome, saldoCentavos: conta.saldo_centavos, chavePix })
+                    : null;
+                  const estaPagando = vendaEmPagamento === conta.venda.id;
+                  const estaExcluindo = vendaEmExclusao?.venda.id === conta.venda.id;
+
+                  return (
+                    <>
+                      <tr key={conta.venda.id}>
+                        <td>
+                          <span class={`${styles.statusTag} ${conta.status_atual === "PARCIAL" ? styles.partialTag : styles.fiadoTag}`}>
+                            {conta.status_atual}
+                          </span>
+                        </td>
+                        <td class={styles.cellPrimary}>{conta.cliente.nome}</td>
+                        <td class={styles.cellSecondary}>
+                          <div>{conta.venda.descricao || conta.venda.itens.map((item) => item.nome_produto).join(", ")}</div>
+                          <div>VENCE EM {formatarData(conta.venda.data_vencimento)}{conta.dias_atraso > 0 ? ` • ${conta.dias_atraso} DIAS ATRASO` : " • EM DIA"}</div>
+                        </td>
+                        <td class={styles.cellPrice}>
+                          <div>{formatarCentavos(conta.saldo_centavos)}</div>
+                          {conta.valor_pago_centavos > 0 && <small class={styles.cellSecondary}>PAGO: {formatarCentavos(conta.valor_pago_centavos)}</small>}
+                        </td>
+                        <td class={styles.actionCol}>
+                          <div class={styles.actionGroup}>
+                            {linkWhatsApp ? <a href={linkWhatsApp} target="_blank" rel="noopener noreferrer" aria-label="COBRAR VIA WHATSAPP" title="Cobrar via WhatsApp" data-tooltip="Cobrar no WhatsApp"><WhatsAppIcon /></a> : <span class={styles.noPhone} title="Sem WhatsApp" data-tooltip="Sem WhatsApp"><WhatsAppIcon /></span>}
+                            <button type="button" onClick={() => abrirPagamento(conta)} aria-label={estaPagando ? "CANCELAR BAIXA" : "REGISTRAR PAGAMENTO"} title={estaPagando ? "Cancelar baixa" : "Registrar pagamento"} data-tooltip={estaPagando ? "Cancelar baixa" : "Registrar baixa"}><PaymentIcon /></button>
+                            <button type="button" onClick={() => editarFiado(conta)} disabled={conta.valor_pago_centavos > 0} aria-label="EDITAR FIADO" title="Editar fiado" data-tooltip="Editar fiado"><EditIcon /></button>
+                            <button class={styles.deleteDebt} type="button" onClick={() => setVendaEmExclusao(conta)} aria-label="EXCLUIR FIADO" title="Excluir fiado" data-tooltip="Excluir fiado"><TrashIcon /></button>
+                          </div>
+                        </td>
+                      </tr>
+
+                      {estaPagando && (
+                        <tr key={`${conta.venda.id}-pagamento`} class={styles.paymentFormRow}>
+                          <td colSpan={5}>
+                            <form class={styles.paymentForm} onSubmit={(event) => registrarPagamento(event, conta)}>
+                              <label>VALOR RECEBIDO<div class={styles.moneyInput}><span>R$</span><input value={valorPagamento} onInput={(event) => setValorPagamento(filtrarDecimal(event.currentTarget.value))} inputMode="decimal" required autoFocus /></div></label>
+                              <label>RECEBIDO POR<select value={metodoPagamento} onChange={(event) => setMetodoPagamento(event.currentTarget.value as MetodoPagamento)}><option value="PIX">PIX</option><option value="DINHEIRO">DINHEIRO</option><option value="CARTAO">CARTÃO</option></select></label>
+                              <button type="submit" disabled={processando}>{processando ? "REGISTRANDO..." : "CONFIRMAR BAIXA"}</button>
+                            </form>
+                          </td>
+                        </tr>
+                      )}
+
+                      {estaExcluindo && (
+                        <tr key={`${conta.venda.id}-exclusao`} class={styles.confirmDeleteRow}>
+                          <td colSpan={5}>
+                            <div class={styles.confirmFlex} role="alertdialog" aria-label={`Confirmar exclusão do fiado de ${conta.cliente.nome}`}>
+                              <div>
+                                <strong>EXCLUIR ESTE FIADO?</strong>
+                                <span> — O lançamento será cancelado, estoque restaurado e histórico mantido.</span>
+                              </div>
+                              <div class={styles.confirmButtons}>
+                                <button type="button" onClick={() => setVendaEmExclusao(null)}>VOLTAR</button>
+                                <button type="button" onClick={() => excluirFiado(conta)} disabled={processando}>CONFIRMAR EXCLUSÃO</button>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         )}
       </section>
     </main>

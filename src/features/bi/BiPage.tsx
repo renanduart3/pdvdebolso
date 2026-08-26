@@ -159,7 +159,11 @@ export function BiPage() {
           </p>
           <div class={styles.hourChart} aria-label="Vendas por hora">
             {indicadores.horarios.barras.map((barra) => (
-              <div class={styles.hourColumn} key={barra.hora}>
+              <div
+                class={styles.hourColumn}
+                key={barra.hora}
+                title={`${String(barra.hora).padStart(2, "0")}h: ${barra.quantidade} venda${barra.quantidade === 1 ? "" : "s"}`}
+              >
                 <span>{barra.quantidade || ""}</span>
                 <div
                   style={{

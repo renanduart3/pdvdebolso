@@ -1,0 +1,20 @@
+name = "pdvdebolso-api"
+main = "src/index.ts"
+compatibility_date = "2024-08-19"
+compatibility_flags = [ "nodejs_compat" ]
+
+[vars]
+# Vars públicas ou chaves seguras a serem passadas depois
+APP_URL = "https://pdvdebolso.com"
+
+# Bucket R2
+[[r2_buckets]]
+binding = "BACKUPS"
+bucket_name = "pdvdebolso-backups"
+
+# KV Namespace para armazenar sessões e dados da conta (plano, stripe id)
+[[kv_namespaces]]
+binding = "ACCOUNTS"
+id = "mock-id-para-dev" # Deve ser substituido na cloudflare
+
+# JWT Secrets e Stripe keys devem vir via `wrangler secret put`

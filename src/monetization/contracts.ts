@@ -1,30 +1,13 @@
-export type PlanoAplicacao = "GRATUITO" | "SEM_ANUNCIOS";
+export type PlanoAplicacao = "GRATUITO" | "PREMIUM";
 
-export interface LicencaLocal {
-  versao: 1;
-  token_restauracao: string;
-  ativada_em: string;
-  verificada_em: string;
-}
-
-export interface PagamentoLicencaPendente {
-  versao: 1;
-  sessao_id: string;
-  criado_em: string;
-}
-
-export interface EstadoLicenca {
+export type UserSession = {
+  email: string;
   plano: PlanoAplicacao;
-  licenca: LicencaLocal | null;
-  pagamento_pendente: PagamentoLicencaPendente | null;
-}
+  expira_em: string;
+};
 
-export type PosicaoAnuncio = "BARRA_LATERAL";
+export type AuthState = {
+  sessao: UserSession | null;
+};
 
-export interface ProvedorAnuncios {
-  readonly id: string;
-  montar(
-    elemento: HTMLElement,
-    posicao: PosicaoAnuncio
-  ): void | (() => void);
-}
+export type ProvedorAnuncios = "ADSENSE" | "NENHUM";

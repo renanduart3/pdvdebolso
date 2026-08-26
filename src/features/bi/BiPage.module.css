@@ -250,21 +250,21 @@
 
 .hourChart {
   display: grid;
-  width: calc(100% - 36px);
   min-width: 0;
   height: 180px;
   margin: 18px;
-  padding: 14px 10px 6px;
-  grid-template-columns: repeat(24, 20px);
+  padding: 14px 8px 6px;
+  grid-template-columns: repeat(24, minmax(0, 1fr));
   align-items: end;
-  gap: 4px;
-  overflow-x: auto;
+  gap: 3px;
+  overflow: hidden;
   border: var(--border);
   background: var(--color-paper);
 }
 
 .hourColumn {
   display: grid;
+  min-width: 0;
   height: 145px;
   grid-template-rows: 18px minmax(0, 1fr) 18px;
   align-items: end;
@@ -274,8 +274,11 @@
 .hourColumn > span,
 .hourColumn small {
   font-family: var(--font-mono);
-  font-size: 0.55rem;
+  font-size: 0.52rem;
   font-weight: 900;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .hourColumn > div {

@@ -1,15 +1,15 @@
 .main {
-  width: min(100%, 1320px);
+  width: min(100%, 1280px);
   margin-inline: auto;
-  padding: clamp(18px, 2.5vw, 34px);
+  padding: clamp(16px, 2vw, 28px);
 }
 
 .hero {
   display: grid;
-  padding-bottom: 16px;
+  padding-bottom: 12px;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: end;
-  gap: 32px;
+  gap: 24px;
   border-bottom: var(--border-heavy);
 }
 
@@ -18,34 +18,37 @@
 .orderTag,
 .statusTag {
   display: inline-block;
-  padding: 6px 9px;
+  padding: 4px 8px;
   border: var(--border);
   background: var(--color-white);
   font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 900;
+  line-height: 1.2;
 }
 
 .hero h1 {
-  margin: 9px 0 5px;
+  margin: 6px 0 4px;
   font-family: var(--font-display);
-  font-size: clamp(1.85rem, 3.6vw, 3.75rem);
-  line-height: 0.9;
-  letter-spacing: -0.07em;
+  font-size: clamp(1.6rem, 3.2vw, 3.2rem);
+  line-height: 0.95;
+  letter-spacing: -0.06em;
 }
 
 .hero p {
   max-width: 680px;
   margin: 0;
-  font-weight: 800;
+  font-size: 0.88rem;
+  font-weight: 750;
 }
 
 .debtCard {
   display: grid;
-  min-width: 230px;
-  padding: 12px 14px;
-  gap: 4px;
+  min-width: 200px;
+  padding: 10px 14px;
+  gap: 2px;
   border: var(--border-heavy);
+  border-radius: var(--radius-small);
   background: var(--color-pink);
   box-shadow: var(--shadow);
 }
@@ -53,31 +56,33 @@
 .debtCard span,
 .debtCard small {
   font-family: var(--font-mono);
+  font-size: 0.68rem;
   font-weight: 900;
 }
 
 .debtCard strong {
   font-family: var(--font-display);
-  font-size: 1.4rem;
-  letter-spacing: -0.05em;
+  font-size: 1.35rem;
+  letter-spacing: -0.04em;
 }
 
 .notice {
   display: grid;
-  margin-top: 24px;
-  padding: 12px 14px;
+  margin-top: 14px;
+  padding: 10px 14px;
   grid-template-columns: auto 1fr auto;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   border: var(--border);
   box-shadow: var(--shadow-small);
   font-weight: 800;
+  font-size: 0.85rem;
 }
 
 .notice button {
-  width: 32px;
-  height: 32px;
-  border: 2px solid var(--color-black);
+  width: 28px;
+  height: 28px;
+  border: var(--border);
   background: var(--color-white);
   font-weight: 900;
   cursor: pointer;
@@ -91,71 +96,26 @@
   background: var(--color-green);
 }
 
-.paymentForm label {
-  display: grid;
-  gap: 6px;
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  font-weight: 900;
-}
-
-.paymentForm input,
-.paymentForm select {
-  width: 100%;
-  min-height: 48px;
-  padding: 10px 12px;
-  border: var(--border);
-  border-radius: 0;
-  background: var(--color-white);
-  color: var(--color-black);
-  font: 800 1rem/1.2 var(--font-body);
-}
-
-.paymentForm > button,
-.accountActions button,
-.accountActions a {
-  display: grid;
-  min-height: 50px;
-  padding: 10px 14px;
-  place-items: center;
-  border: var(--border);
-  background: var(--color-green);
-  box-shadow: var(--shadow-small);
-  color: var(--color-black);
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  font-weight: 900;
-  text-align: center;
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.accountsSection {
-  margin-top: 38px;
-  border: var(--border-heavy);
-  background: var(--color-white);
-  box-shadow: var(--shadow);
-}
-
 .entrySection {
-  margin-top: 24px;
+  margin-top: 16px;
   border: var(--border-heavy);
+  border-radius: var(--radius-small);
   background: var(--color-white);
   box-shadow: var(--shadow);
 }
 
 .entryGrid {
   display: grid;
-  padding: 14px;
-  grid-template-columns: minmax(180px, 1fr) minmax(150px, 0.6fr) minmax(220px, 1.3fr);
-  gap: 12px;
+  padding: 12px 14px;
+  grid-template-columns: minmax(180px, 1fr) minmax(140px, 0.6fr) minmax(200px, 1.2fr);
+  gap: 10px;
 }
 
 .entryGrid label,
 .itemPicker label,
 .avulsoField {
   display: grid;
-  gap: 6px;
+  gap: 4px;
   font-family: var(--font-mono);
   font-size: 0.7rem;
   font-weight: 900;
@@ -166,12 +126,13 @@
 .itemPicker input,
 .avulsoField input {
   width: 100%;
-  min-height: 42px;
-  padding: 8px 10px;
+  height: 38px;
+  padding: 6px 10px;
   border: var(--border);
-  border-radius: 0;
+  border-radius: var(--radius-small);
   background: var(--color-white);
-  font-weight: 800;
+  font-weight: 700;
+  font-size: 0.88rem;
 }
 
 .clientPicker {
@@ -181,7 +142,7 @@
 
 .clientPicker > label {
   display: grid;
-  gap: 6px;
+  gap: 4px;
   font-family: var(--font-mono);
   font-size: 0.7rem;
   font-weight: 900;
@@ -190,16 +151,17 @@
 .clientSuggestions {
   position: absolute;
   z-index: 12;
-  top: calc(100% + 5px);
+  top: calc(100% + 4px);
   right: 0;
   left: 0;
   display: grid;
-  max-height: 260px;
+  max-height: 220px;
   margin: 0;
-  padding: 6px;
-  gap: 5px;
+  padding: 4px;
+  gap: 4px;
   overflow-y: auto;
   border: var(--border);
+  border-radius: var(--radius-small);
   background: var(--color-white);
   box-shadow: var(--shadow-small);
   list-style: none;
@@ -208,12 +170,13 @@
 .clientSuggestions button {
   display: flex;
   width: 100%;
-  min-height: 42px;
-  padding: 7px 9px;
+  height: 36px;
+  padding: 6px 8px;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  border: 2px solid var(--color-black);
+  border: 1px solid var(--color-black);
+  border-radius: var(--radius-small);
   background: var(--color-white);
   text-align: left;
   cursor: pointer;
@@ -223,23 +186,24 @@
 .clientHint,
 .selectedClient small {
   font-family: var(--font-mono);
-  font-size: 0.6rem;
+  font-size: 0.62rem;
   font-weight: 900;
 }
 
 .clientHint {
   display: block;
-  margin-top: 5px;
+  margin-top: 4px;
 }
 
 .selectedClient {
   display: flex;
-  min-height: 42px;
-  margin-top: 6px;
-  padding-left: 9px;
+  height: 38px;
+  margin-top: 4px;
+  padding-left: 8px;
   align-items: center;
   justify-content: space-between;
   border: var(--border);
+  border-radius: var(--radius-small);
   background: var(--color-green);
 }
 
@@ -248,26 +212,27 @@
 }
 
 .selectedClient button {
-  width: 40px;
+  width: 36px;
   align-self: stretch;
   border: 0;
   border-left: var(--border);
   background: var(--color-white);
   font-weight: 900;
+  cursor: pointer;
 }
 
 .modeChoice {
-  display: grid;
-  padding: 0 14px 12px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  display: flex;
+  padding: 0 14px 10px;
   gap: 8px;
 }
 
 .modeChoice button,
 .cancelEdit {
-  min-height: 42px;
-  padding: 7px 10px;
+  height: 36px;
+  padding: 6px 12px;
   border: var(--border);
+  border-radius: var(--radius-small);
   background: var(--color-white);
   box-shadow: var(--shadow-small);
   font-family: var(--font-mono);
@@ -278,8 +243,8 @@
 
 .modeChoice .modeActive {
   background: var(--color-green);
-  box-shadow: 2px 2px 0 var(--color-black);
-  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--color-black);
+  transform: translate(1px, 1px);
 }
 
 .cancelEdit {
@@ -290,15 +255,16 @@
 .avulsoField {
   position: relative;
   display: grid;
-  margin: 0 14px 14px;
-  padding: 12px;
-  gap: 10px;
+  margin: 0 14px 10px;
+  padding: 10px 12px;
+  gap: 8px;
   border: var(--border);
+  border-radius: var(--radius-small);
   background: var(--color-paper);
 }
 
 .avulsoField {
-  max-width: 420px;
+  max-width: 380px;
 }
 
 .itemSuggestions,
@@ -306,7 +272,7 @@
   display: grid;
   margin: 0;
   padding: 0;
-  gap: 7px;
+  gap: 6px;
   list-style: none;
 }
 
@@ -314,14 +280,15 @@
 .selectedItems li {
   display: flex;
   width: 100%;
-  min-height: 42px;
-  padding: 7px 9px;
+  height: 36px;
+  padding: 6px 8px;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 8px;
   border: var(--border);
+  border-radius: var(--radius-small);
   background: var(--color-white);
-  font-weight: 900;
+  font-weight: 800;
 }
 
 .itemSuggestions button {
@@ -329,14 +296,16 @@
 }
 
 .selectedItems li > div {
-  display: grid;
-  grid-template-columns: 34px 38px 34px;
-  border: 2px solid var(--color-black);
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--color-black);
+  border-radius: var(--radius-small);
 }
 
 .selectedItems li > div > * {
   display: grid;
-  min-height: 32px;
+  width: 30px;
+  height: 28px;
   place-items: center;
   border: 0;
   background: var(--color-white);
@@ -344,15 +313,15 @@
 }
 
 .selectedItems li > div strong {
-  border-inline: 2px solid var(--color-black);
+  border-inline: 1px solid var(--color-black);
 }
 
 .entryFooter {
   display: flex;
-  padding: 12px 14px;
+  padding: 10px 14px;
   align-items: center;
   justify-content: space-between;
-  gap: 14px;
+  gap: 12px;
   border-top: var(--border-heavy);
   background: var(--color-orange);
   font-family: var(--font-mono);
@@ -362,25 +331,35 @@
 
 .entryFooter strong {
   font-family: var(--font-display);
-  font-size: 1.4rem;
+  font-size: 1.25rem;
 }
 
 .entryFooter button {
-  min-height: 46px;
-  padding: 8px 16px;
+  height: 38px;
+  padding: 6px 14px;
   border: var(--border);
+  border-radius: var(--radius-small);
   background: var(--color-green);
   box-shadow: var(--shadow-small);
   font-weight: 900;
+  cursor: pointer;
+}
+
+.accountsSection {
+  margin-top: 24px;
+  border: var(--border-heavy);
+  border-radius: var(--radius-small);
+  background: var(--color-white);
+  box-shadow: var(--shadow);
 }
 
 .accountsHeader {
   display: flex;
-  min-height: 78px;
-  padding: 14px;
+  height: 52px;
+  padding: 10px 14px;
   align-items: center;
   justify-content: space-between;
-  gap: 14px;
+  gap: 10px;
   border-bottom: var(--border-heavy);
   background: var(--color-orange);
 }
@@ -388,37 +367,55 @@
 .accountsHeader > div {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .accountsHeader h2 {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(1.3rem, 2.4vw, 2rem);
+  font-size: clamp(1.1rem, 2vw, 1.5rem);
 }
 
-.accountsList {
-  display: grid;
-  margin: 0;
-  padding: 20px;
-  gap: 18px;
-  list-style: none;
+.tableWrapper {
+  width: 100%;
+  overflow-x: auto;
 }
 
-.accountCard {
-  border: var(--border-heavy);
-  background: var(--color-white);
+.dataTable {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.82rem;
 }
 
-.accountTop {
-  display: grid;
-  padding: 18px;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 20px;
+.dataTable th {
+  padding: 8px 12px;
+  border-bottom: var(--border-heavy);
+  background: var(--color-paper);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.03em;
+  color: var(--color-black);
+  white-space: nowrap;
+}
+
+.dataTable td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--color-subtle-bg);
+  vertical-align: middle;
+}
+
+.dataTable tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.dataTable tbody tr:hover {
+  background: var(--color-paper);
 }
 
 .statusTag {
-  padding: 4px 7px;
+  padding: 3px 6px;
 }
 
 .fiadoTag {
@@ -429,149 +426,206 @@
   background: var(--color-purple);
 }
 
-.accountTop h3 {
-  margin: 9px 0 3px;
-  font-family: var(--font-display);
-  font-size: clamp(1.2rem, 2.4vw, 1.75rem);
-  text-transform: uppercase;
+.cellPrimary {
+  font-weight: 800;
+  color: var(--color-black);
 }
 
-.accountTop p {
-  margin: 0;
+.cellSecondary {
   font-family: var(--font-mono);
-  font-size: 0.7rem;
-  font-weight: 900;
+  font-size: 0.72rem;
+  color: #555;
 }
 
-.balance {
-  display: grid;
-  min-width: 180px;
-  align-content: center;
+.cellPrice {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  white-space: nowrap;
+}
+
+.actionCol {
   text-align: right;
+  white-space: nowrap;
 }
 
-.balance span,
-.balance small {
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  font-weight: 900;
+.actionGroup {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
 }
 
-.balance strong {
-  font-family: var(--font-display);
-  font-size: 1.6rem;
-}
-
-.accountActions {
-  display: grid;
-  padding: 14px;
-  gap: 12px;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  border-top: var(--border);
-  background: var(--color-paper);
-}
-
-.accountActions button {
-  background: var(--color-purple);
-}
-
-.accountActions .deleteDebt {
-  background: var(--color-pink);
-}
-
-.confirmDelete {
-  display: grid;
-  padding: 14px;
-  gap: 7px;
-  border-top: var(--border-heavy);
-  background: var(--color-pink);
-}
-
-.confirmDelete strong {
-  font-family: var(--font-display);
-  font-size: 1.15rem;
-}
-
-.confirmDelete span {
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  font-weight: 900;
-}
-
-.confirmDelete > div {
-  display: grid;
-  margin-top: 5px;
-  gap: 8px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.confirmDelete button {
-  min-height: 42px;
+.actionGroup button,
+.actionGroup a {
+  display: inline-flex;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  align-items: center;
+  justify-content: center;
   border: var(--border);
-  background: var(--color-white);
+  border-radius: var(--radius-small);
+  background: var(--color-purple);
   box-shadow: var(--shadow-small);
-  font-weight: 900;
+  color: var(--color-black);
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
 }
 
-.confirmDelete button:last-child {
+.actionGroup a {
   background: var(--color-green);
+}
+
+.actionGroup .deleteDebt {
+  background: var(--color-pink);
 }
 
 .noPhone {
-  display: grid;
-  min-height: 50px;
-  padding: 10px;
-  place-items: center;
+  display: inline-flex;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  align-items: center;
+  justify-content: center;
   border: var(--border);
-  background: #ddd;
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  font-weight: 900;
-  text-align: center;
+  border-radius: var(--radius-small);
+  background: #e2e8f0;
+  color: var(--color-black);
+  opacity: 0.7;
+}
+
+.paymentFormRow {
+  background: var(--color-green) !important;
+}
+
+.paymentFormRow td {
+  padding: 10px 12px;
 }
 
 .paymentForm {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.paymentForm label {
   display: grid;
-  padding: 16px;
-  gap: 14px;
-  grid-template-columns: minmax(0, 1fr) minmax(170px, 0.5fr) auto;
-  align-items: end;
-  border-top: var(--border-heavy);
-  background: var(--color-green);
+  gap: 3px;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 900;
+}
+
+.paymentForm input,
+.paymentForm select {
+  height: 34px;
+  padding: 4px 8px;
+  border: var(--border);
+  border-radius: var(--radius-small);
+  background: var(--color-white);
+  color: var(--color-black);
+  font: 700 0.85rem/1.2 var(--font-body);
+}
+
+.paymentForm > button {
+  height: 34px;
+  padding: 4px 12px;
+  border: var(--border);
+  border-radius: var(--radius-small);
+  background: var(--color-white);
+  box-shadow: var(--shadow-small);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 900;
+  cursor: pointer;
 }
 
 .moneyInput {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
+  display: flex;
 }
 
 .moneyInput span {
-  display: grid;
-  min-width: 48px;
-  place-items: center;
+  display: inline-flex;
+  padding: 0 8px;
+  align-items: center;
   border: var(--border);
   border-right: 0;
+  border-radius: var(--radius-small) 0 0 var(--radius-small);
   background: var(--color-black);
   color: var(--color-white);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 900;
+}
+
+.moneyInput input {
+  border-radius: 0 var(--radius-small) var(--radius-small) 0;
+}
+
+.confirmDeleteRow {
+  background: var(--color-pink) !important;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+}
+
+.confirmDeleteRow td {
+  padding: 8px 12px;
+}
+
+.confirmFlex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.confirmFlex strong {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+}
+
+.confirmButtons {
+  display: flex;
+  gap: 6px;
+}
+
+.confirmButtons button {
+  height: 30px;
+  padding: 4px 10px;
+  border: var(--border);
+  border-radius: var(--radius-small);
+  background: var(--color-white);
+  box-shadow: var(--shadow-small);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.confirmButtons button:last-child {
+  background: var(--color-green);
 }
 
 .emptyState {
   display: grid;
-  min-height: 200px;
-  padding: 30px;
+  min-height: 160px;
+  padding: 24px;
   place-content: center;
-  gap: 8px;
+  gap: 6px;
   text-align: center;
 }
 
 .emptyState strong {
   font-family: var(--font-display);
-  font-size: 1.4rem;
+  font-size: 1.2rem;
 }
 
 .emptyState span {
   font-family: var(--font-mono);
-  font-size: 0.78rem;
+  font-size: 0.75rem;
 }
 
 button:disabled {
@@ -582,16 +636,16 @@ button:disabled {
 
 @media (hover: hover) {
   .paymentForm > button:not(:disabled):hover,
-  .accountActions button:hover,
-  .accountActions a:hover {
-    box-shadow: 2px 2px 0 var(--color-black);
-    transform: translate(2px, 2px);
+  .actionGroup button:hover,
+  .actionGroup a:hover {
+    box-shadow: 1px 1px 0 var(--color-black);
+    transform: translate(1px, 1px);
   }
 }
 
 @media (max-width: 820px) {
   .main {
-    padding: 20px 12px 112px;
+    padding: 14px 10px 100px;
   }
 
   .hero {
@@ -603,60 +657,20 @@ button:disabled {
     min-width: 0;
   }
 
-  .paymentForm {
-    grid-template-columns: 1fr;
-  }
-
   .entryGrid {
     grid-template-columns: 1fr;
   }
-
-  .accountActions {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
 }
 
-@media (max-width: 560px) {
-  .accountsHeader,
-  .accountTop {
-    grid-template-columns: 1fr;
-  }
-
+@media (max-width: 640px) {
   .accountsHeader {
-    align-items: stretch;
     flex-direction: column;
-  }
-
-  .accountTop {
-    display: grid;
-  }
-
-  .balance {
-    min-width: 0;
-    padding-top: 12px;
-    border-top: var(--border);
-    text-align: left;
-  }
-
-  .accountActions {
-    grid-template-columns: 1fr;
-  }
-
-  .modeChoice,
-  .confirmDelete > div {
-    grid-template-columns: 1fr;
-  }
-
-  .entryFooter {
     align-items: stretch;
-    flex-direction: column;
+    height: auto;
   }
 
-  .notice {
-    grid-template-columns: 1fr auto;
-  }
-
-  .notice strong {
-    grid-column: 1 / -1;
+  .dataTable th:nth-child(3),
+  .dataTable td:nth-child(3) {
+    display: none;
   }
 }

@@ -9,6 +9,7 @@ import {
   filtrarDecimal,
   filtrarInteiro
 } from "../shared/numericInput";
+import { EditIcon, TrashIcon } from "../shared/icons";
 import styles from "../shared/Management.module.css";
 
 const PAGINA_VAZIA: PaginaCatalogo = {
@@ -173,29 +174,58 @@ export function CatalogoPage({ onDataChange }: CatalogoPageProps) {
         {carregando ? <div class={styles.empty} role="status"><strong>BUSCANDO ITENS...</strong></div> : resultado.itens.length === 0 ? (
           <div class={styles.empty}><strong>NENHUM ITEM AQUI.</strong><span>Cadastre um item ou tente outro início de nome.</span></div>
         ) : (
-          <ul class={`${styles.list} ${styles.compactList}`}>
-            {resultado.itens.map((item) => (
-              <li class={styles.card} key={item.id}>
-                <div class={styles.cardMain}>
-                  <div><span class={styles.tag}>{item.tipo === "SERVICO" ? "SERVIÇO" : "PRODUTO"}</span><h3>{item.nome}</h3><p>{item.tipo === "SERVICO" ? "SEM ESTOQUE" : `${item.estoque_quantidade} UNIDADES EM ESTOQUE`}</p></div>
-                  <strong class={styles.cardValue}>{formatarCentavos(item.preco_padrao_centavos)}</strong>
-                </div>
-                <div class={styles.cardActions}>
-                  <button type="button" onClick={() => editar(item)} disabled={processando}>EDITAR ITEM</button>
-                  <button class={styles.dangerButton} type="button" onClick={() => setConfirmando(item)} disabled={processando}>EXCLUIR ITEM</button>
-                </div>
-                {confirmando?.id === item.id && (
-                  <div class={styles.confirmAction} role="alertdialog" aria-label={`Confirmar exclusão de ${item.nome}`}>
-                    <strong>EXCLUIR {item.nome}?</strong>
-                    <span>Se houver vendas, o item será preservado no histórico e removido do catálogo operacional.</span>
-                    <div><button type="button" onClick={() => setConfirmando(null)}>CANCELAR</button><button type="button" onClick={() => excluir(item)} disabled={processando}>CONFIRMAR EXCLUSÃO</button></div>
-                  </div>
-                )}
-              </li>
-            ))}
-          </ul>
+          <div class={styles.tableWrapper}>
+            <table class={styles.dataTable}>
+              <thead>
+                <tr>
+                  <th>TIPO</th>
+                  <th>NOME DO ITEM</th>
+                  <th>ESTOQUE</th>
+                  <th>PREÇO PADRÃO</th>
+                  <th class={styles.actionCol}>AÇÕES</th>
+                </tr>
+              </thead>
+              <tbody>
+                {resultado.itens.map((item) => (
+                  confirmando?.id === item.id ? (
+                    <tr key={item.id} class={styles.confirmActionRow}>
+                      <td colSpan={5}>
+                        <div class={styles.confirmFlex} role="alertdialog" aria-label={`Confirmar exclusão de ${item.nome}`}>
+                          <div>
+                            <strong>EXCLUIR {item.nome}?</strong>
+                            <span> — Item será preservado no histórico se houver vendas.</span>
+                          </div>
+                          <div class={styles.confirmButtons}>
+                            <button type="button" onClick={() => setConfirmando(null)}>CANCELAR</button>
+                            <button type="button" onClick={() => excluir(item)} disabled={processando}>CONFIRMAR EXCLUSÃO</button>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : (
+                    <tr key={item.id}>
+                      <td><span class={styles.tag}>{item.tipo === "SERVICO" ? "SERVIÇO" : "PRODUTO"}</span></td>
+                      <td class={styles.cellPrimary}>{item.nome}</td>
+                      <td class={styles.cellSecondary}>{item.tipo === "SERVICO" ? "SEM ESTOQUE" : `${item.estoque_quantidade} UNID.`}</td>
+                      <td class={styles.cellPrice}>{formatarCentavos(item.preco_padrao_centavos)}</td>
+                      <td class={styles.actionCol}>
+                        <div class={styles.actionGroup}>
+                          <button class={styles.actionButton} type="button" onClick={() => editar(item)} disabled={processando} aria-label="EDITAR ITEM" title="Editar item" data-tooltip="Editar item"><EditIcon /></button>
+                          <button class={styles.dangerButton} type="button" onClick={() => setConfirmando(item)} disabled={processando} aria-label="EXCLUIR ITEM" title="Excluir item" data-tooltip="Excluir item"><TrashIcon /></button>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
-        <nav class={styles.pagination} aria-label="Paginação do catálogo"><button type="button" onClick={() => setPagina((atual) => atual - 1)} disabled={resultado.pagina <= 1 || carregando}>← ANTERIOR</button><span>PÁGINA {resultado.pagina} DE {resultado.total_paginas}</span><button type="button" onClick={() => setPagina((atual) => atual + 1)} disabled={resultado.pagina >= resultado.total_paginas || carregando}>PRÓXIMA →</button></nav>
+        <nav class={styles.pagination} aria-label="Paginação do catálogo">
+          <button type="button" onClick={() => setPagina((atual) => atual - 1)} disabled={resultado.pagina <= 1 || carregando} title="Página anterior" data-tooltip="Página anterior">← ANTERIOR</button>
+          <span>PÁGINA {resultado.pagina} DE {resultado.total_paginas}</span>
+          <button type="button" onClick={() => setPagina((atual) => atual + 1)} disabled={resultado.pagina >= resultado.total_paginas || carregando} title="Próxima página" data-tooltip="Próxima página">PRÓXIMA →</button>
+        </nav>
       </section>
     </main>
   );

@@ -54,3 +54,46 @@ textarea:focus-visible {
   background: var(--color-purple);
   color: var(--color-black);
 }
+
+/* Tooltip (balão de sugestão) para botões e controles */
+[data-tooltip] {
+  position: relative;
+}
+
+[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  padding: 4px 8px;
+  border: var(--border);
+  border-radius: var(--radius-small);
+  background: var(--color-black);
+  color: var(--color-white);
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 900;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  z-index: 100;
+  box-shadow: var(--shadow-small);
+}
+
+:root[data-theme="CONFORTO"] [data-tooltip]::after {
+  background: #1e293b;
+  color: #ffffff;
+  border-color: #334155;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
+}
+
+[data-tooltip]:hover::after,
+[data-tooltip]:focus-visible::after {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+

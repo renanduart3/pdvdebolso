@@ -29,17 +29,32 @@ export function calcularTotalItensCentavos(
   }, 0);
 }
 
-export function formatarCentavos(value: number): string {
+export function formatarCentavos(
+  value: number,
+  currency = "BRL",
+  locale = "pt-BR"
+): string {
   assertCentavos(value);
 
-  return new Intl.NumberFormat("pt-BR", {
-    style: "currency",
-    currency: "BRL"
-  }).format(value / 100);
+  try {
+    return new Intl.NumberFormat(locale, {
+      style: "currency",
+      currency: currency
+    })
+      .format(value / 100)
+      .replace(/\u00a0/g, " ");
+  } catch {
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL"
+    })
+      .format(value / 100)
+      .replace(/\u00a0/g, " ");
+  }
 }
 
 export function parsePrecoParaCentavos(input: string): number {
-  const normalized = input.trim().replace(/^R\$\s*/i, "");
+  const normalized = input.trim().replace(/^[R$\s$€A-Za-z\u00a0]+/i, "").trim();
   const match = normalized.match(/^(\d+)(?:[,.](\d{1,2}))?$/);
 
   if (!match) {
@@ -53,4 +68,3 @@ export function parsePrecoParaCentavos(input: string): number {
   assertCentavos(total, "preço");
   return total;
 }
-

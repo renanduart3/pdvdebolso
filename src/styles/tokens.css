@@ -7,17 +7,18 @@
   --color-purple: #b288ff;
   --color-pink: #ff2c85;
   --color-danger: #ff3b30;
+  --color-subtle-bg: #e6e0d4;
 
   --font-display: "Arial Black", "Arial Narrow", Impact, sans-serif;
   --font-body: "Arial", "Helvetica Neue", sans-serif;
   --font-mono: "Roboto Mono", "Courier New", monospace;
 
-  --border: 3px solid var(--color-black);
-  --border-heavy: 4px solid var(--color-black);
-  --shadow: 6px 6px 0 0 var(--color-black);
-  --shadow-small: 4px 4px 0 0 var(--color-black);
-  --shadow-dialog: 10px 10px 0 var(--color-black);
-  --shadow-on-dark: 5px 5px 0 var(--color-white);
+  --border: 2px solid var(--color-black);
+  --border-heavy: 3px solid var(--color-black);
+  --shadow: 4px 4px 0 0 var(--color-black);
+  --shadow-small: 3px 3px 0 0 var(--color-black);
+  --shadow-dialog: 8px 8px 0 var(--color-black);
+  --shadow-on-dark: 4px 4px 0 0 var(--color-white);
   --shadow-on-dark-active: 2px 2px 0 var(--color-white);
   --radius: 0;
   --radius-small: 0;
@@ -41,19 +42,20 @@
   --color-purple: #c4b5e7;
   --color-pink: #e9a6bd;
   --color-danger: #c74758;
+  --color-subtle-bg: #e2e8f0;
 
   --font-display: "Arial", "Helvetica Neue", sans-serif;
   --font-body: "Arial", "Helvetica Neue", sans-serif;
   --font-mono: "Arial", "Helvetica Neue", sans-serif;
 
-  --border: 1px solid #aeb9c9;
-  --border-heavy: 1px solid #96a4b8;
-  --shadow: 0 12px 28px rgb(38 48 68 / 12%);
-  --shadow-small: 0 4px 12px rgb(38 48 68 / 12%);
-  --shadow-dialog: 0 24px 64px rgb(15 23 42 / 24%);
-  --shadow-on-dark: 0 4px 12px rgb(0 0 0 / 18%);
-  --shadow-on-dark-active: 0 2px 6px rgb(0 0 0 / 12%);
-  --radius: 14px;
-  --radius-small: 8px;
+  --border: 1px solid #cbd5e1;
+  --border-heavy: 1px solid #94a3b8;
+  --shadow: 0 4px 14px rgb(38 48 68 / 8%);
+  --shadow-small: 0 2px 6px rgb(38 48 68 / 8%);
+  --shadow-dialog: 0 20px 48px rgb(15 23 42 / 20%);
+  --shadow-on-dark: 0 2px 8px rgb(0 0 0 / 14%);
+  --shadow-on-dark-active: 0 1px 4px rgb(0 0 0 / 10%);
+  --radius: 8px;
+  --radius-small: 6px;
   --focus-color: #3767b1;
 }

@@ -44,7 +44,7 @@ describe("App", () => {
     });
   });
 
-  it("renderiza o PDV expresso", () => {
+  it("renderiza o PDV expresso na Etapa 1 sem mostrar o checkout", () => {
     render(<App />);
 
     expect(screen.getByRole("heading", { name: "VENDA RÁPIDA." })).toBeInTheDocument();
@@ -53,8 +53,47 @@ describe("App", () => {
     ).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "CARRINHO" })).toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: "+ NOVO PRODUTO" })
+      screen.queryByRole("heading", { name: "CHECKOUT E PAGAMENTO" })
     ).not.toBeInTheDocument();
+  });
+
+  it("separa a venda em 2 etapas e exibe resumo dos itens em texto no checkout", async () => {
+    await database.catalogo.add({
+      id: "prod-1",
+      nome: "Suco de Laranja",
+      preco_padrao_centavos: 600,
+      tipo: "PRODUTO",
+      estoque_quantidade: 10,
+      ativo: true
+    });
+    render(<App />);
+
+    fireEvent.input(screen.getByLabelText("DIGITE O INÍCIO DO NOME"), {
+      target: { value: "Suc" }
+    });
+    const item = await screen.findByRole("button", {
+      name: "Adicionar Suco de Laranja ao carrinho"
+    });
+    fireEvent.click(item);
+
+    // Na Etapa 1, não mostra o Checkout
+    expect(
+      screen.queryByRole("heading", { name: "CHECKOUT E PAGAMENTO" })
+    ).not.toBeInTheDocument();
+
+    // Avança para a Etapa 2
+    fireEvent.click(
+      screen.getByRole("button", { name: /PROSSEGUIR PARA CHECKOUT/i })
+    );
+
+    // Na Etapa 2, mostra o Checkout com resumo em texto e não mostra o Carrinho com + / -
+    expect(
+      screen.getByRole("heading", { name: "CHECKOUT E PAGAMENTO" })
+    ).toBeInTheDocument();
+    expect(screen.getByText("1x")).toBeInTheDocument();
+    expect(screen.getByText("Suco de Laranja")).toBeInTheDocument();
+    expect(screen.getAllByText("R$ 6,00").length).toBeGreaterThan(0);
+    expect(screen.queryByRole("heading", { name: "CARRINHO" })).not.toBeInTheDocument();
   });
 
   it("pagina o carrinho em grupos de dez itens", async () => {
@@ -116,6 +155,10 @@ describe("App", () => {
       name: "Adicionar Café grande ao carrinho"
     });
     fireEvent.click(adicionar);
+
+    fireEvent.click(
+      screen.getByRole("button", { name: /PROSSEGUIR PARA CHECKOUT/i })
+    );
     fireEvent.click(screen.getByRole("button", { name: "PIX" }));
     fireEvent.click(screen.getByRole("button", { name: "CONFIRMAR VENDA" }));
     expect(
@@ -148,6 +191,10 @@ describe("App", () => {
       await screen.findByRole("button", {
         name: "Adicionar Kit almoço ao carrinho"
       })
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", { name: /PROSSEGUIR PARA CHECKOUT/i })
     );
     fireEvent.input(screen.getByLabelText("DESCONTO PERCENTUAL"), {
       target: { value: "12,5" }
@@ -200,6 +247,10 @@ describe("App", () => {
       await screen.findByRole("button", {
         name: "Adicionar Entrega ao carrinho"
       })
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", { name: /PROSSEGUIR PARA CHECKOUT/i })
     );
     fireEvent.click(screen.getByRole("button", { name: "FIADO" }));
     fireEvent.click(screen.getByRole("button", { name: "CONFIRMAR FIADO" }));

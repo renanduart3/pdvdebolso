@@ -1,127 +1,114 @@
-import type { LicencaLocal } from "./contracts";
+import type { UserSession } from "./contracts";
 
-const intervalosPolling = [0, 1_500, 3_000, 5_000, 8_000, 13_000];
-
-type StatusRemoto = "PENDENTE" | "APROVADA" | "RECUSADA";
-
-export interface CheckoutLicenca {
-  sessao_id: string;
-  checkout_url: string;
-  status: "PENDENTE";
+export interface ErroApi {
+  error?: string;
+  message?: string;
 }
 
-export type ConsultaLicenca =
-  | { status: "PENDENTE" | "RECUSADA" }
-  | { status: "APROVADA"; licenca: LicencaLocal };
-
-interface ErroApi {
-  erro?: {
-    mensagem?: string;
-  };
-}
-
-function baseUrl(): string {
-  return (import.meta.env.VITE_PAYMENT_WORKER_URL ?? "")
+export function baseUrl(): string {
+  // Para desenvolvimento local
+  return (import.meta.env.VITE_API_URL ?? "http://localhost:8787")
     .trim()
     .replace(/\/$/, "");
 }
 
-export function pagamentoConfigurado(): boolean {
-  return baseUrl().length > 0;
-}
-
-async function requisicao<T>(
+export async function requisicao<T>(
   caminho: string,
-  init?: RequestInit
+  init?: RequestInit,
+  tokenOpcional?: string
 ): Promise<T> {
   const base = baseUrl();
-  if (!base) {
-    throw new Error("O serviço de pagamento ainda não foi configurado.");
+  const headers = new Headers(init?.headers);
+  headers.set("Content-Type", "application/json");
+
+  if (tokenOpcional) {
+    headers.set("Authorization", `Bearer ${tokenOpcional}`);
   }
+
   const resposta = await fetch(`${base}${caminho}`, {
     ...init,
-    headers: {
-      "Content-Type": "application/json",
-      ...init?.headers
-    }
+    headers
   });
+
   if (!resposta.ok) {
-    let mensagem = "O serviço de pagamento não respondeu como esperado.";
+    let mensagem = "A comunicação com o servidor falhou.";
     try {
       const corpo = await resposta.json() as ErroApi;
-      mensagem = corpo.erro?.mensagem ?? mensagem;
+      mensagem = corpo.error ?? corpo.message ?? mensagem;
     } catch {
-      // Mantém uma mensagem segura sem expor a resposta do provedor.
+      // Ignora e usa a genérica
     }
     throw new Error(mensagem);
   }
   return resposta.json() as Promise<T>;
 }
 
-export function criarCheckoutLicenca(
-  idempotencyKey: string
-): Promise<CheckoutLicenca> {
-  return requisicao<CheckoutLicenca>("/v1/licencas/checkout", {
+// ==========================================
+// AUTENTICAÇÃO
+// ==========================================
+export function enviarMagicLink(email: string): Promise<{ message: string }> {
+  return requisicao("/auth/login", {
     method: "POST",
-    headers: {
-      "Idempotency-Key": idempotencyKey
-    }
+    body: JSON.stringify({ email })
   });
 }
 
-export function consultarSessaoLicenca(
-  sessaoId: string,
-  signal?: AbortSignal
-): Promise<ConsultaLicenca> {
-  return requisicao<ConsultaLicenca>(
-    `/v1/licencas/sessoes/${encodeURIComponent(sessaoId)}`,
-    { signal }
-  );
+// O GET /auth/callback é feito diretamente pelo navegador que recebe redirecionamento
+
+// ==========================================
+// STRIPE
+// ==========================================
+export function criarCheckout(sessionToken: string): Promise<{ url: string }> {
+  return requisicao<{ url: string }>("/stripe/checkout", {
+    method: "POST"
+  }, sessionToken);
 }
 
-export async function aguardarConfirmacaoLicenca(
-  sessaoId: string,
-  signal?: AbortSignal
-): Promise<ConsultaLicenca> {
-  let ultima: ConsultaLicenca = { status: "PENDENTE" };
-  for (const intervalo of intervalosPolling) {
-    if (intervalo > 0) {
-      await new Promise<void>((resolve, reject) => {
-        const timer = window.setTimeout(resolve, intervalo);
-        signal?.addEventListener(
-          "abort",
-          () => {
-            window.clearTimeout(timer);
-            reject(new DOMException("Operação cancelada.", "AbortError"));
-          },
-          { once: true }
-        );
-      });
-    }
-    if (signal?.aborted) {
-      throw new DOMException("Operação cancelada.", "AbortError");
-    }
-    ultima = await consultarSessaoLicenca(sessaoId, signal);
-    if (ultima.status !== "PENDENTE") return ultima;
+// ==========================================
+// COFRE EM NUVEM (BACKUP R2)
+// ==========================================
+export async function salvarCofreNuvem(sessionToken: string, json: string): Promise<{ message: string }> {
+  const base = baseUrl();
+  const headers = new Headers();
+  headers.set("Authorization", `Bearer ${sessionToken}`);
+  // R2 espera body cru
+  headers.set("Content-Type", "text/plain");
+
+  const resposta = await fetch(`${base}/backup`, {
+    method: "POST",
+    headers,
+    body: json
+  });
+
+  if (!resposta.ok) {
+    let mensagem = "Não foi possível salvar na nuvem.";
+    try {
+      const corpo = await resposta.json() as ErroApi;
+      mensagem = corpo.error ?? corpo.message ?? mensagem;
+    } catch {}
+    throw new Error(mensagem);
   }
-  return ultima;
+  return resposta.json();
 }
 
-export async function restaurarLicenca(
-  tokenRestauracao: string
-): Promise<LicencaLocal> {
-  const resposta = await requisicao<{ licenca: LicencaLocal }>(
-    "/v1/licencas/restaurar",
-    {
-      method: "POST",
-      body: JSON.stringify({
-        token_restauracao: tokenRestauracao.trim()
-      })
-    }
-  );
-  return resposta.licenca;
-}
+export async function baixarCofreNuvem(sessionToken: string): Promise<string> {
+  const base = baseUrl();
+  const headers = new Headers();
+  headers.set("Authorization", `Bearer ${sessionToken}`);
+  
+  const resposta = await fetch(`${base}/backup`, {
+    method: "GET",
+    headers
+  });
 
-export function ehStatusRemoto(valor: unknown): valor is StatusRemoto {
-  return valor === "PENDENTE" || valor === "APROVADA" || valor === "RECUSADA";
+  if (!resposta.ok) {
+    let mensagem = "Não foi possível resgatar o backup da nuvem.";
+    try {
+      const corpo = await resposta.json() as ErroApi;
+      mensagem = corpo.error ?? corpo.message ?? mensagem;
+    } catch {}
+    throw new Error(mensagem);
+  }
+
+  return resposta.text();
 }

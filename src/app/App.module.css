@@ -157,6 +157,44 @@ button.notificationItem {
   background: var(--color-green);
 }
 
+.upgradeBanner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 12px;
+  background: var(--color-orange);
+  border-bottom: 2px solid var(--color-black);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  z-index: 20;
+}
+
+.upgradeBanner strong {
+  font-weight: 900;
+  background: var(--color-white);
+  padding: 4px 8px;
+  border: 2px solid var(--color-black);
+}
+
+.upgradeBanner span {
+  font-weight: 800;
+}
+
+.upgradeBanner button {
+  background: var(--color-black);
+  color: var(--color-white);
+  border: none;
+  padding: 6px 12px;
+  font-family: inherit;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.upgradeBanner button:hover {
+  opacity: 0.9;
+}
+
 .brand {
   display: flex;
   align-items: center;

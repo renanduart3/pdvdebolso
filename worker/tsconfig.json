@@ -1,14 +1,19 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
-    "lib": ["ES2022", "WebWorker"],
+    "target": "es2022",
+    "lib": ["es2022"],
+    "module": "es2022",
+    "moduleResolution": "bundler",
+    "types": ["@cloudflare/workers-types"],
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "checkJs": false,
     "strict": true,
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
     "noEmit": true,
     "isolatedModules": true,
-    "skipLibCheck": true,
-    "types": ["vitest/globals"]
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true
   },
-  "include": ["./**/*.ts"]
+  "include": ["src/**/*"]
 }

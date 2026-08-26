@@ -7,8 +7,10 @@ import {
   catalogoRepository,
   clientesRepository,
   configuracoesRepository,
-  licencaRepository
 } from "../database/repositories";
+import { getCurrentSession } from "../monetization/authService";
+import type { UserSession } from "../monetization/contracts";
+import { useTranslation } from "../i18n/useTranslation";
 import { BiPage } from "../features/bi/BiPage";
 import { CatalogoPage } from "../features/catalogo/CatalogoPage";
 import { ClientesPage } from "../features/clientes/ClientesPage";
@@ -16,15 +18,14 @@ import { ConfiguracoesPage } from "../features/configuracoes/ConfiguracoesPage";
 import { FiadoPage } from "../features/fiado/FiadoPage";
 import { AdSlot } from "../features/monetization/AdSlot";
 import { PdvPage } from "../features/pdv/PdvPage";
-import type {
-  EstadoLicenca,
-  ProvedorAnuncios
-} from "../monetization/contracts";
+import { PremiumPage } from "../features/premium/PremiumPage";
+import type { ProvedorAnuncios } from "../monetization/contracts";
 import {
   TEMA_PADRAO,
   type TemaAplicacao
 } from "../theme/registry";
 import styles from "./App.module.css";
+import type { TranslationKey } from "../i18n/dictionaries";
 
 type View =
   | "pdv"
@@ -32,12 +33,13 @@ type View =
   | "catalogo"
   | "clientes"
   | "bi"
-  | "configuracoes";
+  | "configuracoes"
+  | "premium";
 
 type NavigationItem = {
   view: View | null;
-  label: string;
-  shortLabel: string;
+  label: TranslationKey;
+  shortLabel: TranslationKey;
   color: "green" | "orange" | "purple" | "pink";
   icon: string;
 };
@@ -45,31 +47,31 @@ type NavigationItem = {
 const navigationItems: NavigationItem[] = [
   {
     view: "bi",
-    label: "Inteligência",
-    shortLabel: "BI",
+    label: "nav.inteligencia",
+    shortLabel: "nav.short.inteligencia",
     color: "green",
     icon: "01"
   },
-  { view: "pdv", label: "Vender", shortLabel: "PDV", color: "green", icon: "02" },
-  { view: "fiado", label: "Fiado", shortLabel: "Fiado", color: "orange", icon: "03" },
+  { view: "pdv", label: "nav.vender", shortLabel: "nav.short.vender", color: "green", icon: "02" },
+  { view: "fiado", label: "nav.fiado", shortLabel: "nav.short.fiado", color: "orange", icon: "03" },
   {
     view: "catalogo",
-    label: "Produtos e Serviços",
-    shortLabel: "Itens",
+    label: "nav.catalogo",
+    shortLabel: "nav.short.catalogo",
     color: "purple",
     icon: "04"
   },
   {
     view: "clientes",
-    label: "Clientes",
-    shortLabel: "Clientes",
+    label: "nav.clientes",
+    shortLabel: "nav.short.clientes",
     color: "pink",
     icon: "05"
   },
   {
     view: "configuracoes",
-    label: "Configurações",
-    shortLabel: "Ajustes",
+    label: "nav.configuracoes",
+    shortLabel: "nav.short.configuracoes",
     color: "orange",
     icon: "06"
   }
@@ -98,6 +100,7 @@ type AppProps = {
 };
 
 export function App({ provedorAnuncios = null }: AppProps) {
+  const { t } = useTranslation();
   const online = useOnlineStatus();
   const [view, setView] = useState<View>("pdv");
   const [backupPendente, setBackupPendente] = useState(false);
@@ -105,7 +108,7 @@ export function App({ provedorAnuncios = null }: AppProps) {
   const [ocultarValores, setOcultarValores] = useState(false);
   const [dadosVersao, setDadosVersao] = useState(0);
   const [tema, setTema] = useState<TemaAplicacao>(TEMA_PADRAO);
-  const [estadoLicenca, setEstadoLicenca] = useState<EstadoLicenca | null>(null);
+  const [sessao, setSessao] = useState<UserSession | null>(null);
   const [resumoCabecalho, setResumoCabecalho] = useState({
     produtos: 0,
     clientes: 0,
@@ -144,13 +147,12 @@ export function App({ provedorAnuncios = null }: AppProps) {
 
   useEffect(() => {
     let ativo = true;
-    licencaRepository
-      .obterEstado()
+    getCurrentSession()
       .then((estado) => {
-        if (ativo) setEstadoLicenca(estado);
+        if (ativo) setSessao(estado.sessao);
       })
       .catch(() => {
-        if (ativo) setEstadoLicenca(null);
+        if (ativo) setSessao(null);
       });
     return () => {
       ativo = false;
@@ -184,8 +186,30 @@ export function App({ provedorAnuncios = null }: AppProps) {
     setView(proximaView);
   }
 
+  async function assinarPremium() {
+    if (!online) throw new Error("Conecte-se à internet para assinar.");
+    const { createStripeCheckout } = await import("../monetization/authService");
+    const checkout = await createStripeCheckout();
+    window.location.href = checkout.url;
+  }
+
+  async function loginMagicLink(email: string) {
+    if (!online) throw new Error("Conecte-se à internet para criar uma conta.");
+    const { loginWithMagicLink } = await import("../monetization/authService");
+    await loginWithMagicLink(email);
+  }
+
   function renderizarView() {
     switch (view) {
+      case "premium":
+        return (
+          <PremiumPage
+            online={online}
+            sessao={sessao}
+            onAssinar={assinarPremium}
+            onLogin={loginMagicLink}
+          />
+        );
       case "fiado":
         return <FiadoPage onDataChange={dadosAlterados} />;
       case "catalogo":
@@ -197,12 +221,9 @@ export function App({ provedorAnuncios = null }: AppProps) {
       case "configuracoes":
         return (
           <ConfiguracoesPage
-            plano={estadoLicenca?.plano ?? "GRATUITO"}
-            estadoLicenca={estadoLicenca}
             online={online}
             tema={tema}
             onTemaChange={setTema}
-            onLicenseChange={dadosAlterados}
             onBackupStatusChange={(pendente) => {
               setBackupPendente(pendente);
               dadosAlterados();
@@ -222,14 +243,22 @@ export function App({ provedorAnuncios = null }: AppProps) {
 
   return (
     <div class={styles.app}>
+      {(sessao === null || sessao.plano === "GRATUITO") && (
+        <div class={styles.upgradeBanner}>
+          <strong>{t("app.premium.title")}</strong>
+          <span>{t("app.premium.desc")}</span>
+          <button type="button" onClick={() => navegar("premium")}>{t("app.premium.btn")}</button>
+        </div>
+      )}
+      
       <header class={styles.header}>
         <a class={styles.brand} href="/" aria-label="PDV de Bolso — início">
           <span class={styles.brandMark} aria-hidden="true">
             P
           </span>
           <span>
-            <strong>PDV DE BOLSO</strong>
-            <small>SEU NEGÓCIO. NO SEU CONTROLE.</small>
+            <strong>{t("nav.pdv_bolso")}</strong>
+            <small>{t("nav.subtitle")}</small>
           </span>
         </a>
 
@@ -242,7 +271,7 @@ export function App({ provedorAnuncios = null }: AppProps) {
         </div>
 
         <div class={styles.headerActions}>
-          <span class={`${styles.connectionBadge} ${online ? styles.online : styles.offline}`} role="status"><span aria-hidden="true">●</span> {online ? "ONLINE" : "OFFLINE"}</span>
+          <span class={`${styles.connectionBadge} ${online ? styles.online : styles.offline}`} role="status"><span aria-hidden="true">●</span> {online ? t("app.online") : t("app.offline")}</span>
           <button class={styles.headerIconButton} type="button" onClick={() => setOcultarValores((atual) => !atual)} aria-label={ocultarValores ? "Mostrar valores monetários" : "Ocultar valores monetários"}>{ocultarValores ? "R$" : "◉"}</button>
           <button class={styles.headerIconButton} type="button" onClick={() => setNotificacoesAbertas((atual) => !atual)} aria-label="Abrir notificações" aria-expanded={notificacoesAbertas}>♢{(backupPendente || !online) && <span class={styles.notificationDot} />}</button>
         </div>
@@ -275,22 +304,34 @@ export function App({ provedorAnuncios = null }: AppProps) {
                 aria-current={item.view === view ? "page" : undefined}
                 disabled={!item.view}
                 onClick={() => item.view && navegar(item.view)}
-                title={item.view ? `Abrir ${item.label}` : "Disponível nas próximas etapas"}
+                title={item.view ? `Abrir ${t(item.label)}` : "Disponível nas próximas etapas"}
               >
                 <span class={styles.navNumber} aria-hidden="true">
                   {item.icon}
                 </span>
-                <span>{item.label}</span>
+                <span>{t(item.label)}</span>
               </button>
             ))}
           </nav>
           <div class={styles.localDataNote}>
-            <strong>100% LOCAL</strong>
-            <span>Seus dados ficam neste dispositivo.</span>
+            <strong>{t("app.local_data")}</strong>
+            <span>{t("app.local_desc")}</span>
           </div>
+          {(sessao === null || sessao.plano === "GRATUITO") && (
+            <button
+              class={`${styles.navButton} ${styles.green}`}
+              type="button"
+              aria-current={view === "premium" ? "page" : undefined}
+              onClick={() => navegar("premium")}
+              title="Assinar o Plano Premium"
+            >
+              <span class={styles.navNumber} aria-hidden="true">★</span>
+              <span>PREMIUM</span>
+            </button>
+          )}
           <AdSlot
             online={online}
-            semAnuncios={estadoLicenca?.plano !== "GRATUITO"}
+            semAnuncios={sessao?.plano === "PREMIUM"}
             provedor={provedorAnuncios}
           />
         </aside>
@@ -309,7 +350,7 @@ export function App({ provedorAnuncios = null }: AppProps) {
             aria-current={item.view === view ? "page" : undefined}
           >
             <span aria-hidden="true">{item.icon}</span>
-            {item.shortLabel}
+            {t(item.shortLabel)}
           </button>
         ))}
       </nav>

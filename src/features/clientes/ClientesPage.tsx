@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "preact/hooks";
 import { clientesRepository } from "../../database/repositories";
 import type { PaginaClientes } from "../../database/repositories/clientesRepository";
 import type { Cliente } from "../../database/types";
+import { EditIcon, TrashIcon, WhatsAppIcon } from "../shared/icons";
 import styles from "../shared/Management.module.css";
 
 const PAGINA_VAZIA: PaginaClientes = {
@@ -168,38 +169,67 @@ export function ClientesPage({ onDataChange }: ClientesPageProps) {
         {carregando ? <div class={styles.empty} role="status"><strong>BUSCANDO CLIENTES...</strong></div> : resultado.itens.length === 0 ? (
           <div class={styles.empty}><strong>NENHUM CLIENTE AQUI.</strong><span>Cadastre um contato ou tente outro início de nome.</span></div>
         ) : (
-          <ul class={`${styles.list} ${styles.compactList}`}>
-            {resultado.itens.map((cliente) => (
-              <li class={styles.card} key={cliente.id}>
-                <div class={styles.cardMain}>
-                  <div>
-                    <span class={styles.tag}>{cliente.telefone_whatsapp ? "WHATSAPP" : "CLIENTE"}</span>
-                    <h3>{cliente.nome}</h3>
-                    <p>{cliente.telefone ?? "SEM TELEFONE"}</p>
-                    {cliente.email && <p>{cliente.email}</p>}
-                    {cliente.anotacoes && <small>{cliente.anotacoes}</small>}
-                  </div>
-                  <span class={styles.tag}>{new Intl.DateTimeFormat("pt-BR").format(new Date(cliente.data_cadastro))}</span>
-                </div>
-                <div class={styles.cardActions}>
-                  {cliente.telefone && cliente.telefone_whatsapp ? (
-                    <a class={styles.whatsappAction} href={`https://wa.me/${cliente.telefone}`} target="_blank" rel="noopener noreferrer">ABRIR WHATSAPP ↗</a>
-                  ) : <span class={styles.mutedAction}>SEM WHATSAPP</span>}
-                  <button type="button" onClick={() => editar(cliente)} disabled={processando}>EDITAR CLIENTE</button>
-                  <button class={styles.dangerButton} type="button" onClick={() => setConfirmando(cliente)} disabled={processando}>EXCLUIR CLIENTE</button>
-                </div>
-                {confirmando?.id === cliente.id && (
-                  <div class={styles.confirmAction} role="alertdialog" aria-label={`Confirmar exclusão de ${cliente.nome}`}>
-                    <strong>EXCLUIR {cliente.nome}?</strong>
-                    <span>Se houver movimentação financeira, o cliente será preservado no histórico.</span>
-                    <div><button type="button" onClick={() => setConfirmando(null)}>CANCELAR</button><button type="button" onClick={() => excluir(cliente)} disabled={processando}>CONFIRMAR EXCLUSÃO</button></div>
-                  </div>
-                )}
-              </li>
-            ))}
-          </ul>
+          <div class={styles.tableWrapper}>
+            <table class={styles.dataTable}>
+              <thead>
+                <tr>
+                  <th>STATUS</th>
+                  <th>NOME DO CLIENTE</th>
+                  <th>CONTATO / E-MAIL</th>
+                  <th>CADASTRADO EM</th>
+                  <th class={styles.actionCol}>AÇÕES</th>
+                </tr>
+              </thead>
+              <tbody>
+                {resultado.itens.map((cliente) => (
+                  confirmando?.id === cliente.id ? (
+                    <tr key={cliente.id} class={styles.confirmActionRow}>
+                      <td colSpan={5}>
+                        <div class={styles.confirmFlex} role="alertdialog" aria-label={`Confirmar exclusão de ${cliente.nome}`}>
+                          <div>
+                            <strong>EXCLUIR {cliente.nome}?</strong>
+                            <span> — Se houver movimentação financeira, será mantido no histórico.</span>
+                          </div>
+                          <div class={styles.confirmButtons}>
+                            <button type="button" onClick={() => setConfirmando(null)}>CANCELAR</button>
+                            <button type="button" onClick={() => excluir(cliente)} disabled={processando}>CONFIRMAR EXCLUSÃO</button>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : (
+                    <tr key={cliente.id}>
+                      <td><span class={styles.tag}>{cliente.telefone_whatsapp ? "WHATSAPP" : "CLIENTE"}</span></td>
+                      <td class={styles.cellPrimary}>
+                        <div>{cliente.nome}</div>
+                        {cliente.anotacoes && <div class={styles.cellSecondary}>{cliente.anotacoes}</div>}
+                      </td>
+                      <td class={styles.cellSecondary}>
+                        <div>{cliente.telefone ?? "SEM TELEFONE"}</div>
+                        {cliente.email && <div>{cliente.email}</div>}
+                      </td>
+                      <td class={styles.cellSecondary}>{new Intl.DateTimeFormat("pt-BR").format(new Date(cliente.data_cadastro))}</td>
+                      <td class={styles.actionCol}>
+                        <div class={styles.actionGroup}>
+                          {cliente.telefone && cliente.telefone_whatsapp ? (
+                            <a class={styles.whatsappAction} href={`https://wa.me/${cliente.telefone}`} target="_blank" rel="noopener noreferrer" aria-label="ABRIR WHATSAPP" title="Abrir WhatsApp" data-tooltip="Abrir WhatsApp"><WhatsAppIcon /></a>
+                          ) : <span class={styles.mutedAction} title="Sem WhatsApp" data-tooltip="Sem WhatsApp"><WhatsAppIcon /></span>}
+                          <button class={styles.actionButton} type="button" onClick={() => editar(cliente)} disabled={processando} aria-label="EDITAR CLIENTE" title="Editar cliente" data-tooltip="Editar cliente"><EditIcon /></button>
+                          <button class={styles.dangerButton} type="button" onClick={() => setConfirmando(cliente)} disabled={processando} aria-label="EXCLUIR CLIENTE" title="Excluir cliente" data-tooltip="Excluir cliente"><TrashIcon /></button>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
-        <nav class={styles.pagination} aria-label="Paginação de clientes"><button type="button" onClick={() => setPagina((atual) => atual - 1)} disabled={resultado.pagina <= 1 || carregando}>← ANTERIOR</button><span>PÁGINA {resultado.pagina} DE {resultado.total_paginas}</span><button type="button" onClick={() => setPagina((atual) => atual + 1)} disabled={resultado.pagina >= resultado.total_paginas || carregando}>PRÓXIMA →</button></nav>
+        <nav class={styles.pagination} aria-label="Paginação de clientes">
+          <button type="button" onClick={() => setPagina((atual) => atual - 1)} disabled={resultado.pagina <= 1 || carregando} title="Página anterior" data-tooltip="Página anterior">← ANTERIOR</button>
+          <span>PÁGINA {resultado.pagina} DE {resultado.total_paginas}</span>
+          <button type="button" onClick={() => setPagina((atual) => atual + 1)} disabled={resultado.pagina >= resultado.total_paginas || carregando} title="Próxima página" data-tooltip="Próxima página">PRÓXIMA →</button>
+        </nav>
       </section>
     </main>
   );
